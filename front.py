@@ -4,6 +4,13 @@ from utils import *
 
 #main window includes a welcome message and a button
 
+class AgendaItem:
+    def __init__(self, name, description, time):
+        self.name = name
+        self.description = description
+        self.time = time
+
+agenda = [AgendaItem("Meeting 1", "Discuss project", "10:00"), AgendaItem("Meeting 2", "Discuss project", "11:00")]
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -65,7 +72,7 @@ class MainWindow(QMainWindow):
             msg.setWindowTitle("Success")
             msg.setText("Login successful")
             msg.exec_()
-            self.create_group()
+            self.my_account(username)
         else:
             msg = QMessageBox()
             msg.setWindowTitle("Error")
@@ -161,7 +168,7 @@ class MainWindow(QMainWindow):
             msg.setText("Group creation failed")
             msg.exec_()
 
-    def my_account(self, username, agenda, pending_meetings):
+    def my_account(self, username, agenda = agenda, pending_meetings = [1,2,3]):
         layout = QVBoxLayout()
 
         label = QLabel("My Account")
@@ -182,7 +189,101 @@ class MainWindow(QMainWindow):
         create_meeting_btn.clicked.connect(self.create_meeting)
         layout.addWidget(create_meeting_btn)
 
-        
+        widget = QWidget()
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
+
+    def view_agenda(self, agenda):
+        layout = QVBoxLayout()
+
+        label = QLabel("Agenda")
+        layout.addWidget(label)
+
+        for item in agenda:
+            label = QLabel(f"{item.name} at {item.time}: {item.description}")
+            layout.addWidget(label)
+
+        widget = QWidget()
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
+
+    def view_pending_meetings(self, pending_meetings):
+        layout = QVBoxLayout()
+
+        label = QLabel("Pending Meetings")
+        layout.addWidget(label)
+
+        for meeting in pending_meetings:
+            label = QLabel(f"Meeting {meeting}")
+            layout.addWidget(label)
+
+        widget = QWidget()
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
+
+    def create_meeting(self):
+        layout = QVBoxLayout()
+
+        label = QLabel("Create Meeting")
+
+        label_meeting_name = QLabel("Meeting Name")
+        meeting_name_input = QLineEdit()
+        layout.addWidget(label)
+        layout.addWidget(label_meeting_name)
+        layout.addWidget(meeting_name_input)
+
+        label_description = QLabel("Description")
+        description_input = QLineEdit()
+        layout.addWidget(label_description)
+        layout.addWidget(description_input)
+
+        label_time = QLabel("Time")
+        time_input = QLineEdit()
+        layout.addWidget(label_time)
+        layout.addWidget(time_input)
+
+        allusers = [1,2,3,4]
+        label_users = QLabel("Add Users")
+        layout.addWidget(label_users)
+
+        list_widget = QListWidget()
+        for user in allusers:
+            item = QListWidgetItem(str(user))
+            item.setCheckState(0)
+            list_widget.addItem(item)
+        layout.addWidget(list_widget)
+
+        button_submit = QPushButton("Submit")
+        button_submit.clicked.connect(lambda: self.try_create_meeting(meeting_name_input.text(), description_input.text(), time_input.text(), get_Selected_users(list_widget)))
+        layout.addWidget(button_submit)
+
+        widget = QWidget()
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
+
+    def try_create_meeting(self, name, description, time, users):
+        agenda.append(AgendaItem(name, description, time))
+        msg = QMessageBox()
+        msg.setWindowTitle("Success")
+        msg.setText("Meeting created")
+        msg.exec_()
+        self.my_account("username")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
