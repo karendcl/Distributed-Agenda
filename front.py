@@ -1,14 +1,19 @@
 import sys
+
+from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 from utils import *
+import datetime
 
 #main window includes a welcome message and a button
 
 class AgendaItem:
-    def __init__(self, name, description, time):
+    def __init__(self, name, description, time, date = datetime.datetime.today()):
         self.name = name
         self.description = description
         self.time = time
+        self.date = date
 
 agenda = [AgendaItem("Meeting 1", "Discuss project", "10:00"), AgendaItem("Meeting 2", "Discuss project", "11:00")]
 class MainWindow(QMainWindow):
@@ -21,7 +26,13 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
 
         label = QLabel("Welcome to the app")
+        label.setAlignment(Qt.AlignCenter)
+        font = QFont("Comic Sans MS", 16)
+        font.setBold(True)
+        label.setFont(font)
+
         layout.addWidget(label)
+
 
         button_log_in = QPushButton("Log In")
         button_log_in.clicked.connect(self.on_login_click)
@@ -50,8 +61,6 @@ class MainWindow(QMainWindow):
         layout.addWidget(username_input)
         layout.addWidget(label_password)
         layout.addWidget(password_input)
-
-
 
         button_submit = QPushButton("Submit")
         button_submit.clicked.connect(lambda: self.try_log_in(username_input.text(), password_input.text()))
@@ -199,9 +208,13 @@ class MainWindow(QMainWindow):
         label = QLabel("Agenda")
         layout.addWidget(label)
 
-        for item in agenda:
-            label = QLabel(f"{item.name} at {item.time}: {item.description}")
-            layout.addWidget(label)
+        # for item in agenda:
+        #     label = QLabel(f"{item.name} at {item.time}: {item.description}")
+        #     layout.addWidget(label)
+
+        table = createTable(agenda)
+        layout.addWidget(table)
+
 
         widget = QWidget()
         widget.setLayout(layout)
@@ -237,6 +250,11 @@ class MainWindow(QMainWindow):
         layout.addWidget(label_description)
         layout.addWidget(description_input)
 
+        date_label = QLabel("Date")
+        date_input = QCalendarWidget()
+        layout.addWidget(date_label)
+        layout.addWidget(date_input)
+
         label_time = QLabel("Time")
         time_input = QLineEdit()
         layout.addWidget(label_time)
@@ -254,15 +272,15 @@ class MainWindow(QMainWindow):
         layout.addWidget(list_widget)
 
         button_submit = QPushButton("Submit")
-        button_submit.clicked.connect(lambda: self.try_create_meeting(meeting_name_input.text(), description_input.text(), time_input.text(), get_Selected_users(list_widget)))
+        button_submit.clicked.connect(lambda: self.try_create_meeting(meeting_name_input.text(), description_input.text(), time_input.text(), get_Selected_users(list_widget), date_input.selectedDate().toString("yyyy-MM-dd")))
         layout.addWidget(button_submit)
 
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-    def try_create_meeting(self, name, description, time, users):
-        agenda.append(AgendaItem(name, description, time))
+    def try_create_meeting(self, name, description, time, users, date):
+        agenda.append(AgendaItem(name, description, time, date))
         msg = QMessageBox()
         msg.setWindowTitle("Success")
         msg.setText("Meeting created")
@@ -271,7 +289,22 @@ class MainWindow(QMainWindow):
 
 
 
+def createTable(agenda : [AgendaItem]):
+    table = QTableWidget()
+    table.setRowCount(len(agenda))
+    table.setColumnCount(4)
+    table.setHorizontalHeaderLabels(["Name", "Description", "Time", "Date"])
+    print(agenda)
+    for i, item in enumerate(agenda):
+        table.setItem(i, 0, QTableWidgetItem(item.name))
+        table.setItem(i, 1, QTableWidgetItem(item.description))
+        table.setItem(i, 2, QTableWidgetItem(item.time))
+        table.setItem(i, 3, QTableWidgetItem(str(item.date)))
 
+    table.horizontalHeader().setStretchLastSection(True)
+    table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+
+    return table
 
 
 
