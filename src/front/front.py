@@ -195,6 +195,8 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(widget)
 
     def view_agenda(self, agenda):
+        self.setGeometry(100, 100, 800, 600)
+
         layout = QVBoxLayout()
 
         label = QLabel("Agenda")
@@ -212,6 +214,8 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(widget)
 
     def view_pending_meetings(self, username):
+        self.setGeometry(100, 100, 800, 600)
+
         layout = QVBoxLayout()
 
         label = QLabel("Pending Meetings")
@@ -308,7 +312,8 @@ class MainWindow(QMainWindow):
         table = QTableWidget()
         table.setRowCount(len(agenda))
         table.setColumnCount(4) if not need_to_accept else table.setColumnCount(5)
-        table.setHorizontalHeaderLabels(["Name", "Description", "Time", "Date"])
+        table.setHorizontalHeaderLabels(["Name", "Description", "Time", "Date"]) if not need_to_accept else (
+            table.setHorizontalHeaderLabels(["Name", "Description", "Time", "Date", "Accept/Decline"]))
         for i, item in enumerate(agenda):
             table.setItem(i, 0, QTableWidgetItem(item.name))
             table.setItem(i, 1, QTableWidgetItem(item.description))
@@ -324,19 +329,6 @@ class MainWindow(QMainWindow):
         table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         return table
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #main function
