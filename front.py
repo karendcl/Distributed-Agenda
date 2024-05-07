@@ -8,14 +8,6 @@ import datetime
 
 #main window includes a welcome message and a button
 
-class AgendaItem:
-    def __init__(self, name, description, time, date = datetime.datetime.today()):
-        self.name = name
-        self.description = description
-        self.time = time
-        self.date = date
-
-agenda = [AgendaItem("Meeting 1", "Discuss project", "10:00"), AgendaItem("Meeting 2", "Discuss project", "11:00")]
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -177,7 +169,7 @@ class MainWindow(QMainWindow):
             msg.setText("Group creation failed")
             msg.exec_()
 
-    def my_account(self, username, agenda = agenda, pending_meetings = [1,2,3]):
+    def my_account(self, username):
         layout = QVBoxLayout()
 
         label = QLabel("My Account")
@@ -185,13 +177,13 @@ class MainWindow(QMainWindow):
         label_username = QLabel(f"Username: {username}")
 
         view_agenda_btn = QPushButton("View Agenda")
-        view_agenda_btn.clicked.connect(lambda: self.view_agenda(agenda))
+        view_agenda_btn.clicked.connect(lambda: self.view_agenda(get_meetings(username)))
         layout.addWidget(label)
         layout.addWidget(label_username)
         layout.addWidget(view_agenda_btn)
 
         view_pending_meetings_btn = QPushButton("View Pending Meetings")
-        view_pending_meetings_btn.clicked.connect(lambda: self.view_pending_meetings(pending_meetings))
+        view_pending_meetings_btn.clicked.connect(lambda: self.view_pending_meetings(get_pending_meetings(username)))
         layout.addWidget(view_pending_meetings_btn)
 
         create_meeting_btn = QPushButton("Create Meeting")
@@ -208,27 +200,30 @@ class MainWindow(QMainWindow):
         label = QLabel("Agenda")
         layout.addWidget(label)
 
-        # for item in agenda:
-        #     label = QLabel(f"{item.name} at {item.time}: {item.description}")
-        #     layout.addWidget(label)
-
-        table = createTable(agenda)
+        table = self.createTable(agenda)
         layout.addWidget(table)
 
+        back_btn = QPushButton("Back")
+        back_btn.clicked.connect(lambda: self.my_account("username"))
+        layout.addWidget(back_btn)
 
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-    def view_pending_meetings(self, pending_meetings):
+    def view_pending_meetings(self, username):
         layout = QVBoxLayout()
 
         label = QLabel("Pending Meetings")
         layout.addWidget(label)
 
-        for meeting in pending_meetings:
-            label = QLabel(f"Meeting {meeting}")
-            layout.addWidget(label)
+        meetings = get_pending_meetings(username)
+        table = self.createTable(meetings, True)
+        layout.addWidget(table)
+
+        back_btn = QPushButton("Back")
+        back_btn.clicked.connect(lambda: self.my_account("username"))
+        layout.addWidget(back_btn)
 
         widget = QWidget()
         widget.setLayout(layout)
@@ -275,12 +270,15 @@ class MainWindow(QMainWindow):
         button_submit.clicked.connect(lambda: self.try_create_meeting(meeting_name_input.text(), description_input.text(), time_input.text(), get_Selected_users(list_widget), date_input.selectedDate().toString("yyyy-MM-dd")))
         layout.addWidget(button_submit)
 
+        back_btn = QPushButton("Back")
+        back_btn.clicked.connect(lambda: self.my_account("username"))
+        layout.addWidget(back_btn)
+
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
     def try_create_meeting(self, name, description, time, users, date):
-        agenda.append(AgendaItem(name, description, time, date))
         msg = QMessageBox()
         msg.setWindowTitle("Success")
         msg.setText("Meeting created")
@@ -288,23 +286,44 @@ class MainWindow(QMainWindow):
         self.my_account("username")
 
 
+    def accept_decline(self, username, id):
+        #pop up question
+        msg = QMessageBox()
+        msg.setWindowTitle("Accept/Decline")
+        msg.setText("Do you want to accept or decline the meeting?")
+        accept_btn = QPushButton("Accept")
+        decline_btn = QPushButton("Decline")
+        msg.addButton(accept_btn, QMessageBox.AcceptRole)
+        msg.addButton(decline_btn, QMessageBox.RejectRole)
+        msg.exec_()
+        if msg.clickedButton() == accept_btn:
+            accept_meeting(username, id)
+        else:
+            decline_meeting(username, id)
 
-def createTable(agenda : [AgendaItem]):
-    table = QTableWidget()
-    table.setRowCount(len(agenda))
-    table.setColumnCount(4)
-    table.setHorizontalHeaderLabels(["Name", "Description", "Time", "Date"])
-    print(agenda)
-    for i, item in enumerate(agenda):
-        table.setItem(i, 0, QTableWidgetItem(item.name))
-        table.setItem(i, 1, QTableWidgetItem(item.description))
-        table.setItem(i, 2, QTableWidgetItem(item.time))
-        table.setItem(i, 3, QTableWidgetItem(str(item.date)))
+        self.view_pending_meetings(username)
 
-    table.horizontalHeader().setStretchLastSection(True)
-    table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
-    return table
+    def createTable(self, agenda : [AgendaItem], need_to_accept = False):
+        table = QTableWidget()
+        table.setRowCount(len(agenda))
+        table.setColumnCount(4) if not need_to_accept else table.setColumnCount(5)
+        table.setHorizontalHeaderLabels(["Name", "Description", "Time", "Date"])
+        for i, item in enumerate(agenda):
+            table.setItem(i, 0, QTableWidgetItem(item.name))
+            table.setItem(i, 1, QTableWidgetItem(item.description))
+            table.setItem(i, 2, QTableWidgetItem(item.time))
+            table.setItem(i, 3, QTableWidgetItem(str(item.date)))
+            if need_to_accept:
+                button = QPushButton("Accept/Decline")
+                button.clicked.connect(lambda: self.accept_decline("username", i))
+                table.setCellWidget(i, 4, button)
+
+
+        table.horizontalHeader().setStretchLastSection(True)
+        table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+
+        return table
 
 
 
