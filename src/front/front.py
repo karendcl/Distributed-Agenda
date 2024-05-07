@@ -4,7 +4,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from utils import *
-import datetime
 
 #main window includes a welcome message and a button
 
