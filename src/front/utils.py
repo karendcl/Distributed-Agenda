@@ -1,4 +1,5 @@
 import datetime
+import random
 
 class AgendaItem:
     def __init__(self, name, description, time, date = datetime.datetime.today()):
@@ -36,7 +37,8 @@ def get_meetings(username):
 def get_pending_meetings(username):
     meetings = []
     for i in range(5):
-        meeting = AgendaItem(f'Meeting {i}', f'Description {i}', f'{i}:00', datetime.datetime.today())
+        ind = random.randint(0, 5)
+        meeting = AgendaItem(f'Meeting {ind}', f'Description {ind}', f'{ind}:00', datetime.datetime.today())
         meetings.append(meeting)
     return meetings
 
@@ -52,3 +54,26 @@ def decline_meeting(username, id):
     print('decline_meeting')
     return True
 
+def identify_conflicts(accepted_meetings: list[AgendaItem], pending_meetings: list[AgendaItem] = None) -> list[int]:
+    conflicts = []
+    for i in range(len(accepted_meetings)):
+        for j in range(i+1, len(accepted_meetings)):
+            if accepted_meetings[i].date == accepted_meetings[j].date and accepted_meetings[i].time == accepted_meetings[j].time:
+                #todo append the id of the conflicting meetings not the index
+                conflicts.append(i)
+                conflicts.append(j)
+    if pending_meetings:
+        for i in range(len(accepted_meetings)):
+            for j in range(len(pending_meetings)):
+                if accepted_meetings[i].date == pending_meetings[j].date and accepted_meetings[i].time == pending_meetings[j].time:
+                    #todo append the id of the conflicting meetings not the index
+                    conflicts.append(i)
+                    conflicts.append(j)
+    return conflicts
+
+
+def get_all_users(username):
+    return ['user1', 'user2', 'user3', 'user4', 'user5']
+
+def get_all_groups():
+    return ['group1', 'group2', 'group3', 'group4', 'group5']

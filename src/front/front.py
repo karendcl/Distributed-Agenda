@@ -5,8 +5,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from utils import *
 
-#main window includes a welcome message and a button
-
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -23,7 +21,6 @@ class MainWindow(QMainWindow):
         label.setFont(font)
 
         layout.addWidget(label)
-
 
         button_log_in = QPushButton("Log In")
         button_log_in.clicked.connect(self.on_login_click)
@@ -120,7 +117,10 @@ class MainWindow(QMainWindow):
             msg.setText("Sign up failed")
             msg.exec_()
 
-    def create_group(self, all_users = [1,2,3,4]):
+    def create_group(self, username):
+
+        all_users = get_all_users(username)
+
         layout = QVBoxLayout()
 
         label = QLabel("Create Group")
@@ -135,9 +135,10 @@ class MainWindow(QMainWindow):
         hierarchical = QCheckBox("Hierarchical")
         layout.addWidget(hierarchical)
 
-
         label_users = QLabel("Add Users")
         layout.addWidget(label_users)
+
+        print(all_users)
 
         list_widget = QListWidget()
         for user in all_users:
@@ -167,8 +168,12 @@ class MainWindow(QMainWindow):
             msg.setWindowTitle("Error")
             msg.setText("Group creation failed")
             msg.exec_()
+        self.my_account("username")
 
     def my_account(self, username):
+
+        self.setGeometry(100, 100, 400, 200)
+
         layout = QVBoxLayout()
 
         label = QLabel("My Account")
@@ -186,8 +191,12 @@ class MainWindow(QMainWindow):
         layout.addWidget(view_pending_meetings_btn)
 
         create_meeting_btn = QPushButton("Create Meeting")
-        create_meeting_btn.clicked.connect(self.create_meeting)
+        create_meeting_btn.clicked.connect(lambda: self.create_meeting(username))
         layout.addWidget(create_meeting_btn)
+
+        create_group_btn = QPushButton("Create Group")
+        create_group_btn.clicked.connect(lambda: self.create_group(username))
+        layout.addWidget(create_group_btn)
 
         widget = QWidget()
         widget.setLayout(layout)
@@ -232,7 +241,7 @@ class MainWindow(QMainWindow):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-    def create_meeting(self):
+    def create_meeting(self, username):
         layout = QVBoxLayout()
 
         label = QLabel("Create Meeting")
@@ -258,7 +267,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(label_time)
         layout.addWidget(time_input)
 
-        allusers = [1,2,3,4]
+        allusers = get_all_users(username)
         label_users = QLabel("Add Users")
         layout.addWidget(label_users)
 
@@ -268,6 +277,17 @@ class MainWindow(QMainWindow):
             item.setCheckState(0)
             list_widget.addItem(item)
         layout.addWidget(list_widget)
+
+        groups = get_all_groups()
+        label_groups = QLabel("Add Groups")
+        layout.addWidget(label_groups)
+
+        list_widget_groups = QListWidget()
+        for group in groups:
+            item = QListWidgetItem(str(group))
+            item.setCheckState(0)
+            list_widget_groups.addItem(item)
+        layout.addWidget(list_widget_groups)
 
         button_submit = QPushButton("Submit")
         button_submit.clicked.connect(lambda: self.try_create_meeting(meeting_name_input.text(), description_input.text(), time_input.text(), get_Selected_users(list_widget), date_input.selectedDate().toString("yyyy-MM-dd")))
@@ -308,6 +328,8 @@ class MainWindow(QMainWindow):
 
 
     def createTable(self, agenda : [AgendaItem], need_to_accept = False):
+        conflicts = identify_conflicts(agenda)
+        print(conflicts)
         table = QTableWidget()
         table.setRowCount(len(agenda))
         table.setColumnCount(4) if not need_to_accept else table.setColumnCount(5)
@@ -323,6 +345,11 @@ class MainWindow(QMainWindow):
                 button.clicked.connect(lambda: self.accept_decline("username", i))
                 table.setCellWidget(i, 4, button)
 
+            if i in conflicts:
+                table.item(i, 0).setBackground(QColor(255, 0, 0))
+            else:
+                table.item(i, 0).setBackground(QColor(0, 255, 0))
+
 
         table.horizontalHeader().setStretchLastSection(True)
         table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -336,3 +363,6 @@ if __name__ == "__main__":
     window = MainWindow()
     window.show()
     sys.exit(app.exec_())
+
+
+#todo add viewing agenda of others
