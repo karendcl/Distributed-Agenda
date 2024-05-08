@@ -1,12 +1,15 @@
 import datetime
 import random
+import json
+import hashlib
 
 class AgendaItem:
-    def __init__(self, name, description, time, date = datetime.datetime.today()):
+    def __init__(self, name, description, time, date = datetime.datetime.today(), id = 0):
         self.name = name
         self.description = description
         self.time = time
         self.date = date
+        self.id = id
 
 def create_group(group_name, selected_users, hierarchical):
     print(f'group_name: {group_name}, selected_users: {selected_users}, hierarchical: {hierarchical}')
@@ -19,40 +22,97 @@ def get_Selected_users(list_widget):
             selected_users.append(list_widget.item(i).text())
     return selected_users
 
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
+
 def login(username, password):
-    print(f'username: {username}, password: {password}')
-    return True
+    path = '../data/users.json'
+    try:
+        with open(path, 'r') as f:
+            users = json.load(f)
+    except FileNotFoundError:
+        return False
+    if username in users and users[username] == hash_password(password):
+        return True
+    return False
 
 def signup(username, password):
-    print(f'username: {username}, password: {password}')
+    path = '../data/users.json'
+    try:
+        with open(path, 'r') as f:
+            users = json.load(f)
+    except FileNotFoundError:
+        users = {}
+
+    if username in users:
+        return False
+    users[username] = hash_password(password)
+    with open(path, 'w') as f:
+        json.dump(users, f)
     return True
 
+def get_meeting(username,path):
+    try:
+        with open(path, 'r') as f:
+            meetings = json.load(f)
+    except FileNotFoundError:
+        return []
+    return [AgendaItem(meeting['name'], meeting['description'], meeting['time'], meeting['date'], ind)
+            for ind, meeting in enumerate(meetings.values()) if username in meeting['participants']]
 def get_meetings(username):
-    meetings = []
-    for i in range(5):
-        meeting = AgendaItem(f'Meeting {i}', f'Description {i}', f'{i}:00', datetime.datetime.today())
-        meetings.append(meeting)
-    return meetings
+    path = '../data/meetings.json'
+    return get_meeting(username,path)
 
 def get_pending_meetings(username):
-    meetings = []
-    for i in range(5):
-        ind = random.randint(0, 5)
-        meeting = AgendaItem(f'Meeting {ind}', f'Description {ind}', f'{ind}:00', datetime.datetime.today())
-        meetings.append(meeting)
-    return meetings
+    path = '../data/pending_meetings.json'
+    return get_meeting(username,path)
 
-def create_meeting():
-    print('create_meeting')
+def create_meeting(name, description, time, date, participants, groups, username):
+    path = '../data/pending_meetings.json'
+    meeting = {'name': name, 'description': description, 'time': time, 'date': date,
+                    'participants': participants + [username], 'groups': groups}
+    return add_meeting(path, meeting)
+
+def remove_meeting(path, id):
+    try:
+        with open(path, 'r') as f:
+            meetings = json.load(f)
+    except FileNotFoundError:
+        return False
+    meeting = meetings.pop(str(id))
+    with open(path, 'w') as f:
+        json.dump(meetings, f)
+    return meeting
+
+def add_meeting(path, meet):
+    try:
+        with open(path, 'r') as f:
+            meetings = json.load(f)
+    except FileNotFoundError:
+        return False
+
+    id = len(meetings)
+    meetings[id] = meet
+
+    with open(path, 'w') as f:
+        json.dump(meetings, f)
     return True
 
 def accept_meeting(username, id):
-    print('accept_meeting')
-    return True
+    path = '../data/pending_meetings.json'
+
+    meet = remove_meeting(path, id)
+    if not meet:
+        return False
+
+    path = '../data/meetings.json'
+    return add_meeting(path, meet)
+
 
 def decline_meeting(username, id):
-    print('decline_meeting')
-    return True
+    path = '../data/pending_meetings.json'
+    meeting = remove_meeting(path, id)
+    return False if not meeting else True
 
 def identify_conflicts(accepted_meetings: list[AgendaItem], pending_meetings: list[AgendaItem] = None) -> list[int]:
     conflicts = []
@@ -60,20 +120,32 @@ def identify_conflicts(accepted_meetings: list[AgendaItem], pending_meetings: li
         for j in range(i+1, len(accepted_meetings)):
             if accepted_meetings[i].date == accepted_meetings[j].date and accepted_meetings[i].time == accepted_meetings[j].time:
                 #todo append the id of the conflicting meetings not the index
-                conflicts.append(i)
-                conflicts.append(j)
+                conflicts.append(accepted_meetings[i].id)
+                conflicts.append(accepted_meetings[j].id)
     if pending_meetings:
         for i in range(len(accepted_meetings)):
             for j in range(len(pending_meetings)):
                 if accepted_meetings[i].date == pending_meetings[j].date and accepted_meetings[i].time == pending_meetings[j].time:
                     #todo append the id of the conflicting meetings not the index
-                    conflicts.append(i)
-                    conflicts.append(j)
+                    conflicts.append(accepted_meetings[i].id)
+                    conflicts.append(pending_meetings[j].id)
     return conflicts
 
 
 def get_all_users(username):
-    return ['user1', 'user2', 'user3', 'user4', 'user5']
+    path = '../data/users.json'
+    try:
+        with open(path, 'r') as f:
+            users = json.load(f)
+    except FileNotFoundError:
+        return []
+    return [user for user in users.keys() if user != username]
 
 def get_all_groups():
-    return ['group1', 'group2', 'group3', 'group4', 'group5']
+    path = '../data/groups.json'
+    try:
+        with open(path, 'r') as f:
+            groups = json.load(f)
+    except FileNotFoundError:
+        return []
+    return groups.keys()

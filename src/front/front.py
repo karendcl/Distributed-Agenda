@@ -181,13 +181,13 @@ class MainWindow(QMainWindow):
         label_username = QLabel(f"Username: {username}")
 
         view_agenda_btn = QPushButton("View Agenda")
-        view_agenda_btn.clicked.connect(lambda: self.view_agenda(get_meetings(username)))
+        view_agenda_btn.clicked.connect(lambda: self.view_agenda(get_meetings(username), username))
         layout.addWidget(label)
         layout.addWidget(label_username)
         layout.addWidget(view_agenda_btn)
 
         view_pending_meetings_btn = QPushButton("View Pending Meetings")
-        view_pending_meetings_btn.clicked.connect(lambda: self.view_pending_meetings(get_pending_meetings(username)))
+        view_pending_meetings_btn.clicked.connect(lambda: self.view_pending_meetings(username))
         layout.addWidget(view_pending_meetings_btn)
 
         create_meeting_btn = QPushButton("Create Meeting")
@@ -202,7 +202,7 @@ class MainWindow(QMainWindow):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-    def view_agenda(self, agenda):
+    def view_agenda(self, agenda, username):
         self.setGeometry(100, 100, 800, 600)
 
         layout = QVBoxLayout()
@@ -210,11 +210,11 @@ class MainWindow(QMainWindow):
         label = QLabel("Agenda")
         layout.addWidget(label)
 
-        table = self.createTable(agenda)
+        table = self.createTable(agenda, username)
         layout.addWidget(table)
 
         back_btn = QPushButton("Back")
-        back_btn.clicked.connect(lambda: self.my_account("username"))
+        back_btn.clicked.connect(lambda: self.my_account(username))
         layout.addWidget(back_btn)
 
         widget = QWidget()
@@ -230,11 +230,11 @@ class MainWindow(QMainWindow):
         layout.addWidget(label)
 
         meetings = get_pending_meetings(username)
-        table = self.createTable(meetings, True)
+        table = self.createTable(meetings, username, True)
         layout.addWidget(table)
 
         back_btn = QPushButton("Back")
-        back_btn.clicked.connect(lambda: self.my_account("username"))
+        back_btn.clicked.connect(lambda: self.my_account(username))
         layout.addWidget(back_btn)
 
         widget = QWidget()
@@ -290,23 +290,34 @@ class MainWindow(QMainWindow):
         layout.addWidget(list_widget_groups)
 
         button_submit = QPushButton("Submit")
-        button_submit.clicked.connect(lambda: self.try_create_meeting(meeting_name_input.text(), description_input.text(), time_input.text(), get_Selected_users(list_widget), date_input.selectedDate().toString("yyyy-MM-dd")))
+        button_submit.clicked.connect(lambda: self.try_create_meeting(meeting_name_input.text(), description_input.text(),
+                                                                      time_input.text(), get_Selected_users(list_widget),
+                                                                      date_input.selectedDate().toString("yyyy-MM-dd"),
+                                                                      get_Selected_users(list_widget_groups), username))
         layout.addWidget(button_submit)
 
         back_btn = QPushButton("Back")
-        back_btn.clicked.connect(lambda: self.my_account("username"))
+        back_btn.clicked.connect(lambda: self.my_account(username))
         layout.addWidget(back_btn)
 
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-    def try_create_meeting(self, name, description, time, users, date):
+    def try_create_meeting(self, name, description, time, users, date, groups, username):
+        success = create_meeting(name, description, time, date, users, groups, username)
+
         msg = QMessageBox()
-        msg.setWindowTitle("Success")
-        msg.setText("Meeting created")
-        msg.exec_()
-        self.my_account("username")
+
+        if success:
+            msg.setWindowTitle("Success")
+            msg.setText("Meeting created")
+            msg.exec_()
+            self.my_account(username)
+        else:
+            msg.setWindowTitle("Error")
+            msg.setText("Meeting creation failed")
+            msg.exec_()
 
 
     def accept_decline(self, username, id):
@@ -327,7 +338,7 @@ class MainWindow(QMainWindow):
         self.view_pending_meetings(username)
 
 
-    def createTable(self, agenda : [AgendaItem], need_to_accept = False):
+    def createTable(self, agenda : [AgendaItem], username, need_to_accept = False):
         conflicts = identify_conflicts(agenda)
         print(conflicts)
         table = QTableWidget()
@@ -342,7 +353,7 @@ class MainWindow(QMainWindow):
             table.setItem(i, 3, QTableWidgetItem(str(item.date)))
             if need_to_accept:
                 button = QPushButton("Accept/Decline")
-                button.clicked.connect(lambda: self.accept_decline("username", i))
+                button.clicked.connect(lambda: self.accept_decline(username, i))
                 table.setCellWidget(i, 4, button)
 
             if i in conflicts:
