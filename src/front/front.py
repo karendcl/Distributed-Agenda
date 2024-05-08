@@ -148,7 +148,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(list_widget)
 
         button_submit = QPushButton("Submit")
-        button_submit.clicked.connect(lambda: self.try_create_group(group_name_input.text(), get_Selected_users(list_widget), hierarchical.isChecked()))
+        button_submit.clicked.connect(lambda: self.try_create_group(group_name_input.text(), get_Selected_users(list_widget), hierarchical.isChecked(), username))
         layout.addWidget(button_submit)
 
         widget = QWidget()
@@ -156,8 +156,8 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(widget)
 
 
-    def try_create_group(self, group_name, selected_users, hierarchical):
-        success = create_group(group_name, selected_users, hierarchical)
+    def try_create_group(self, group_name, selected_users, hierarchical, username):
+        success = create_group(group_name, selected_users, hierarchical, username)
         if success:
             msg = QMessageBox()
             msg.setWindowTitle("Success")

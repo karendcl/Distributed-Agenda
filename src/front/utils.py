@@ -11,7 +11,7 @@ class AgendaItem:
         self.date = date
         self.id = id
 
-def create_group(group_name, selected_users, hierarchical):
+def create_group(group_name, selected_users, hierarchical, username):
     path = '../data/groups.json'
     try:
         with open(path, 'r') as f:
@@ -22,6 +22,7 @@ def create_group(group_name, selected_users, hierarchical):
     if group_name in groups:
         return False
 
+    selected_users += [username]
     groups[group_name] = {'users': selected_users, 'hierarchical': hierarchical}
     with open(path, 'w') as f:
         json.dump(groups, f)
