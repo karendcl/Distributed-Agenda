@@ -12,8 +12,31 @@ class AgendaItem:
         self.id = id
 
 def create_group(group_name, selected_users, hierarchical):
-    print(f'group_name: {group_name}, selected_users: {selected_users}, hierarchical: {hierarchical}')
+    path = '../data/groups.json'
+    try:
+        with open(path, 'r') as f:
+            groups = json.load(f)
+    except FileNotFoundError:
+        groups = {}
+
+    if group_name in groups:
+        return False
+
+    groups[group_name] = {'users': selected_users, 'hierarchical': hierarchical}
+    with open(path, 'w') as f:
+        json.dump(groups, f)
     return True
+
+def get_groups_of_user(username):
+    path = '../data/groups.json'
+    try:
+        with open(path, 'r') as f:
+            groups : dict = json.load(f)
+    except FileNotFoundError:
+        return []
+
+    return [key for key,value in groups.items() if username in value['users']]
+
 
 def get_Selected_users(list_widget):
     selected_users = []
@@ -119,14 +142,12 @@ def identify_conflicts(accepted_meetings: list[AgendaItem], pending_meetings: li
     for i in range(len(accepted_meetings)):
         for j in range(i+1, len(accepted_meetings)):
             if accepted_meetings[i].date == accepted_meetings[j].date and accepted_meetings[i].time == accepted_meetings[j].time:
-                #todo append the id of the conflicting meetings not the index
                 conflicts.append(accepted_meetings[i].id)
                 conflicts.append(accepted_meetings[j].id)
     if pending_meetings:
         for i in range(len(accepted_meetings)):
             for j in range(len(pending_meetings)):
                 if accepted_meetings[i].date == pending_meetings[j].date and accepted_meetings[i].time == pending_meetings[j].time:
-                    #todo append the id of the conflicting meetings not the index
                     conflicts.append(accepted_meetings[i].id)
                     conflicts.append(pending_meetings[j].id)
     return conflicts

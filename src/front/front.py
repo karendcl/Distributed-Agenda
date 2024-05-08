@@ -180,10 +180,13 @@ class MainWindow(QMainWindow):
 
         label_username = QLabel(f"Username: {username}")
 
+        label_groups = QLabel(f"Groups: {get_groups_of_user(username)}")
+
         view_agenda_btn = QPushButton("View Agenda")
         view_agenda_btn.clicked.connect(lambda: self.view_agenda(get_meetings(username), username))
         layout.addWidget(label)
         layout.addWidget(label_username)
+        layout.addWidget(label_groups)
         layout.addWidget(view_agenda_btn)
 
         view_pending_meetings_btn = QPushButton("View Pending Meetings")
