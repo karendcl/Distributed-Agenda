@@ -4,10 +4,11 @@ import json
 import hashlib
 
 class AgendaItem:
-    def __init__(self, name, description, time, date = datetime.datetime.today(), id = 0):
+    def __init__(self, name, description, time, time_end, date = datetime.datetime.today(), id = 0):
         self.name = name
         self.description = description
-        self.time = time
+        self.time_start = time
+        self.time_end = time_end
         self.date = date
         self.id = id
 
@@ -81,7 +82,7 @@ def get_meeting(username,path):
             meetings = json.load(f)
     except FileNotFoundError:
         return []
-    return [AgendaItem(meeting['name'], meeting['description'], meeting['time'], meeting['date'], ind)
+    return [AgendaItem(meeting['name'], meeting['description'], meeting['time_start'], meeting['time_end'], meeting['date'], ind)
             for ind, meeting in enumerate(meetings.values()) if username in meeting['participants']]
 def get_meetings(username):
     path = '../data/meetings.json'
@@ -91,9 +92,9 @@ def get_pending_meetings(username):
     path = '../data/pending_meetings.json'
     return get_meeting(username,path)
 
-def create_meeting(name, description, time, date, participants, groups, username):
+def create_meeting(name, description, time,endtime, date, participants, groups, username):
     path = '../data/pending_meetings.json'
-    meeting = {'name': name, 'description': description, 'time': time, 'date': date,
+    meeting = {'name': name, 'description': description, 'time_start': time, 'time_end': endtime, 'date': date,
                     'participants': participants + [username], 'groups': groups}
     return add_meeting(path, meeting)
 
@@ -113,7 +114,7 @@ def add_meeting(path, meet):
         with open(path, 'r') as f:
             meetings = json.load(f)
     except FileNotFoundError:
-        return False
+        meetings = {}
 
     id = len(meetings)
     meetings[id] = meet

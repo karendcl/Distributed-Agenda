@@ -201,13 +201,10 @@ class MainWindow(QMainWindow):
 
         label_username = QLabel(f"Username: {username}")
 
-        label_groups = QLabel(f"Groups: {get_groups_of_user(username)}")
-
         view_agenda_btn = QPushButton("View Agenda")
         view_agenda_btn.clicked.connect(lambda: self.view_agenda(get_meetings(username), username))
         layout.addWidget(label)
         layout.addWidget(label_username)
-        layout.addWidget(label_groups)
         layout.addWidget(view_agenda_btn)
 
         view_pending_meetings_btn = QPushButton("View Pending Meetings")
@@ -286,10 +283,15 @@ class MainWindow(QMainWindow):
         layout.addWidget(date_label)
         layout.addWidget(date_input)
 
-        label_time = QLabel("Time")
+        label_time = QLabel("Start Time (HH:MM)")
         time_input = QLineEdit()
         layout.addWidget(label_time)
         layout.addWidget(time_input)
+
+        end_time_label = QLabel("End Time (HH:MM)")
+        end_time_input = QLineEdit()
+        layout.addWidget(end_time_label)
+        layout.addWidget(end_time_input)
 
         allusers = get_all_users(username)
         label_users = QLabel("Add Users")
@@ -315,7 +317,7 @@ class MainWindow(QMainWindow):
 
         button_submit = QPushButton("Submit")
         button_submit.clicked.connect(lambda: self.try_create_meeting(meeting_name_input.text(), description_input.text(),
-                                                                      time_input.text(), get_Selected_users(list_widget),
+                                                                      time_input.text(), end_time_input.text(), get_Selected_users(list_widget),
                                                                       date_input.selectedDate().toString("yyyy-MM-dd"),
                                                                       get_Selected_users(list_widget_groups), username))
         layout.addWidget(button_submit)
@@ -328,8 +330,8 @@ class MainWindow(QMainWindow):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-    def try_create_meeting(self, name, description, time, users, date, groups, username):
-        success = create_meeting(name, description, time, date, users, groups, username)
+    def try_create_meeting(self, name, description, time, endtime, users, date, groups, username):
+        success = create_meeting(name, description, time,endtime, date, users, groups, username)
 
         msg = QMessageBox()
 
@@ -367,18 +369,20 @@ class MainWindow(QMainWindow):
         print(conflicts)
         table = QTableWidget()
         table.setRowCount(len(agenda))
-        table.setColumnCount(4) if not need_to_accept else table.setColumnCount(5)
-        table.setHorizontalHeaderLabels(["Name", "Description", "Time", "Date"]) if not need_to_accept else (
-            table.setHorizontalHeaderLabels(["Name", "Description", "Time", "Date", "Accept/Decline"]))
+        table.setColumnCount(5) if not need_to_accept else table.setColumnCount(6)
+        headings = ["Name", "Description", "Start", "End", "Date"]
+        headings = headings + ["Accept/Decline"] if need_to_accept else headings
+        table.setHorizontalHeaderLabels(headings)
         for i, item in enumerate(agenda):
             table.setItem(i, 0, QTableWidgetItem(item.name))
             table.setItem(i, 1, QTableWidgetItem(item.description))
-            table.setItem(i, 2, QTableWidgetItem(item.time))
-            table.setItem(i, 3, QTableWidgetItem(str(item.date)))
+            table.setItem(i, 2, QTableWidgetItem(item.time_start))
+            table.setItem(i, 3, QTableWidgetItem(item.time_end))
+            table.setItem(i, 4, QTableWidgetItem(str(item.date)))
             if need_to_accept:
                 button = QPushButton("Accept/Decline")
                 button.clicked.connect(lambda: self.accept_decline(username, i))
-                table.setCellWidget(i, 4, button)
+                table.setCellWidget(i, 5, button)
 
             if i in conflicts:
                 table.item(i, 0).setBackground(QColor(255, 0, 0))
@@ -399,5 +403,5 @@ if __name__ == "__main__":
     window.show()
     sys.exit(app.exec_())
 
-
+#todo view conflicts taking into consideration duration
 #todo add viewing agenda of others
