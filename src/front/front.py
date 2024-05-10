@@ -5,6 +5,26 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from utils import *
 
+class PasswordLineEdit(QLineEdit):
+    def __init__(self, parent = None):
+        super().__init__(parent)
+        self.setEchoMode(QLineEdit.Password)
+        self.iconShow = QIcon('icons/eye.png')
+        self.iconHide = QIcon('icons/closed_eye.png')
+
+        self.showPassAction = QAction(self.iconShow, 'Show Password', self)
+        self.addAction(self.showPassAction, QLineEdit.TrailingPosition)
+        self.showPassAction.setCheckable(True)
+        self.showPassAction.toggled.connect(self.togglePasswordVisibility)
+
+    def togglePasswordVisibility(self, show):
+        if show:
+            self.setEchoMode(QLineEdit.Normal)
+            self.showPassAction.setIcon(self.iconHide)
+        else:
+            self.setEchoMode(QLineEdit.Password)
+            self.showPassAction.setIcon(self.iconShow)
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -42,7 +62,8 @@ class MainWindow(QMainWindow):
         label_username = QLabel("Username")
         label_password = QLabel("Password")
         username_input = QLineEdit()
-        password_input = QLineEdit()
+        password_input = PasswordLineEdit()
+
         signup_btn = QPushButton("Sign Up Instead")
         layout.addWidget(label)
         layout.addWidget(label_username)
@@ -83,7 +104,7 @@ class MainWindow(QMainWindow):
         label_username = QLabel("Username")
         label_password = QLabel("Password")
         username_input = QLineEdit()
-        password_input = QLineEdit()
+        password_input = PasswordLineEdit()
         log_in_btn = QPushButton("Have an account? Log In")
         layout.addWidget(label)
         layout.addWidget(label_username)
@@ -326,10 +347,10 @@ class MainWindow(QMainWindow):
     def accept_decline(self, username, id):
         #pop up question
         msg = QMessageBox()
-        msg.setWindowTitle("Accept/Decline")
-        msg.setText("Do you want to accept or decline the meeting?")
-        accept_btn = QPushButton("Accept")
-        decline_btn = QPushButton("Decline")
+        msg.setWindowTitle("Accept meeting")
+        msg.setText("Do you want to accept the meeting?")
+        accept_btn = QPushButton("Yes")
+        decline_btn = QPushButton("No")
         msg.addButton(accept_btn, QMessageBox.AcceptRole)
         msg.addButton(decline_btn, QMessageBox.RejectRole)
         msg.exec_()
