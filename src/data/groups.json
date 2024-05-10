@@ -1,1 +1,1 @@
-{"hola": {"users": ["karen1"], "hierarchical": false}, "": {"users": ["karen"], "hierarchical": false}}
+{"hola": {"users": ["karen1"], "hierarchical": false}, "": {"users": ["karen"], "hierarchical": false}, "a": {"users": ["karen", "username"], "hierarchical": true}, "grupo1": {"users": ["karen1", "karen"], "hierarchical": true}, "hola2": {"users": ["karen1", "karen"], "hierarchical": true}}
