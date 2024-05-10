@@ -86,11 +86,15 @@ def get_meeting(username,path):
             for ind, meeting in enumerate(meetings.values()) if username in meeting['participants']]
 def get_meetings(username):
     path = '../data/meetings.json'
-    return get_meeting(username,path)
+    ans =  get_meeting(username,path)
+    ans.sort(key=lambda x: (x.date, x.time_start))
+    return ans
 
 def get_pending_meetings(username):
     path = '../data/pending_meetings.json'
-    return get_meeting(username,path)
+    ans =  get_meeting(username,path)
+    ans.sort(key=lambda x: (x.date, x.time_start))
+    return ans
 
 def create_meeting(name, description, time,endtime, date, participants, groups, username):
     path = '../data/pending_meetings.json'

@@ -5,6 +5,35 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from utils import *
 
+# override QLineEdit to add border
+class QLineEdit(QLineEdit):
+    def __init__(self, parent = None):
+        super().__init__(parent)
+        self.setStyleSheet("border: 1px solid gray;")
+        self.setFixedHeight(30)
+
+        #set font Calibri, 10
+        font = QFont("Calibri", 10)
+        self.setFont(font)
+
+class QLabel(QLabel):
+    def __init__(self, text, parent = None):
+        super().__init__(text, parent)
+        font = QFont("Calibri", 12)
+        font.setBold(True)
+        self.setFont(font)
+
+class QPushButton(QPushButton):
+    def __init__(self, text, parent = None):
+        super().__init__(text, parent)
+        self.setStyleSheet("border: 1px solid gray;")
+        self.setFixedHeight(30)
+        self.setFixedWidth(10 * len(text) + 20)
+
+        #set font Calibri, 10
+        font = QFont("Calibri", 10)
+        self.setFont(font)
+
 class PasswordLineEdit(QLineEdit):
     def __init__(self, parent = None):
         super().__init__(parent)
@@ -16,6 +45,10 @@ class PasswordLineEdit(QLineEdit):
         self.addAction(self.showPassAction, QLineEdit.TrailingPosition)
         self.showPassAction.setCheckable(True)
         self.showPassAction.toggled.connect(self.togglePasswordVisibility)
+
+        #do border
+        self.setFixedHeight(30)
+        self.setFixedWidth(200)
 
     def togglePasswordVisibility(self, show):
         if show:
@@ -29,30 +62,41 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Welcome")
+        self.setWindowTitle("Agenda")
         self.setGeometry(100, 100, 400, 200)
 
         layout = QVBoxLayout()
 
-        label = QLabel("Welcome to the app")
+        label = QLabel("Your personal agenda")
         label.setAlignment(Qt.AlignCenter)
-        font = QFont("Comic Sans MS", 16)
+        font = QFont("Calibri", 16)
         font.setBold(True)
+        # label.setStyleSheet("color: blue")
         label.setFont(font)
 
         layout.addWidget(label)
 
         button_log_in = QPushButton("Log In")
         button_log_in.clicked.connect(self.on_login_click)
-        layout.addWidget(button_log_in)
+        layout.addWidget(button_log_in, alignment = Qt.AlignCenter)
 
         button_sign_up = QPushButton("Sign Up")
         button_sign_up.clicked.connect(self.on_signup_click)
-        layout.addWidget(button_sign_up)
+        layout.addWidget(button_sign_up, alignment = Qt.AlignCenter)
 
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
+
+    def closeEvent(self, event):
+        reply = QMessageBox.question(self, 'Message',
+            "Are you sure to quit?", QMessageBox.Yes |
+            QMessageBox.No, QMessageBox.No)
+
+        if reply == QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
 
     def on_login_click(self):
         layout = QVBoxLayout()
@@ -73,9 +117,9 @@ class MainWindow(QMainWindow):
 
         button_submit = QPushButton("Submit")
         button_submit.clicked.connect(lambda: self.try_log_in(username_input.text(), password_input.text()))
-        layout.addWidget(button_submit)
+        layout.addWidget(button_submit, alignment = Qt.AlignCenter)
 
-        layout.addWidget(signup_btn)
+        layout.addWidget(signup_btn, alignment = Qt.AlignCenter)
         signup_btn.clicked.connect(self.on_signup_click)
 
         widget = QWidget()
@@ -114,9 +158,9 @@ class MainWindow(QMainWindow):
 
         button_submit = QPushButton("Submit")
         button_submit.clicked.connect(lambda: self.try_sign_up(username_input.text(), password_input.text()))
-        layout.addWidget(button_submit)
+        layout.addWidget(button_submit, alignment = Qt.AlignCenter)
 
-        layout.addWidget(log_in_btn)
+        layout.addWidget(log_in_btn, alignment = Qt.AlignCenter)
         log_in_btn.clicked.connect(self.on_login_click)
 
         widget = QWidget()
@@ -170,7 +214,11 @@ class MainWindow(QMainWindow):
 
         button_submit = QPushButton("Submit")
         button_submit.clicked.connect(lambda: self.try_create_group(group_name_input.text(), get_Selected_users(list_widget), hierarchical.isChecked(), username))
-        layout.addWidget(button_submit)
+        layout.addWidget(button_submit, alignment = Qt.AlignCenter)
+
+        back_btn = QPushButton("Back")
+        back_btn.clicked.connect(lambda: self.my_account(username))
+        layout.addWidget(back_btn, alignment = Qt.AlignCenter)
 
         widget = QWidget()
         widget.setLayout(layout)
@@ -182,14 +230,16 @@ class MainWindow(QMainWindow):
         if success:
             msg = QMessageBox()
             msg.setWindowTitle("Success")
+            msg.setIcon(QMessageBox.Information)
             msg.setText("Group created")
             msg.exec_()
         else:
             msg = QMessageBox()
             msg.setWindowTitle("Error")
+            msg.setIcon(QMessageBox.Critical)
             msg.setText("Group creation failed")
             msg.exec_()
-        self.my_account("username")
+        self.my_account(username)
 
     def my_account(self, username):
 
@@ -205,19 +255,19 @@ class MainWindow(QMainWindow):
         view_agenda_btn.clicked.connect(lambda: self.view_agenda(get_meetings(username), username))
         layout.addWidget(label)
         layout.addWidget(label_username)
-        layout.addWidget(view_agenda_btn)
+        layout.addWidget(view_agenda_btn, alignment = Qt.AlignCenter)
 
         view_pending_meetings_btn = QPushButton("View Pending Meetings")
         view_pending_meetings_btn.clicked.connect(lambda: self.view_pending_meetings(username))
-        layout.addWidget(view_pending_meetings_btn)
+        layout.addWidget(view_pending_meetings_btn, alignment=Qt.AlignCenter)
 
         create_meeting_btn = QPushButton("Create Meeting")
         create_meeting_btn.clicked.connect(lambda: self.create_meeting(username))
-        layout.addWidget(create_meeting_btn)
+        layout.addWidget(create_meeting_btn, alignment=Qt.AlignCenter)
 
         create_group_btn = QPushButton("Create Group")
         create_group_btn.clicked.connect(lambda: self.create_group(username))
-        layout.addWidget(create_group_btn)
+        layout.addWidget(create_group_btn, alignment=Qt.AlignCenter)
 
         widget = QWidget()
         widget.setLayout(layout)
