@@ -4,6 +4,7 @@ class Database:
     def __init__(self, name):
         self.name = name
         self.tables = []
+        self.create()
 
     def create(self):
         DB_Utils.create_database(self.name)
