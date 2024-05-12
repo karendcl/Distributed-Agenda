@@ -300,8 +300,9 @@ class MainWindow(QMainWindow):
         label = QLabel("Pending Meetings")
         layout.addWidget(label)
 
-        meetings = get_pending_meetings(username)
-        table = self.createTable(meetings, username, True)
+        accepted = get_meetings(username)
+        tabulate = get_pending_meetings(username)
+        table = self.createTable(tabulate, username, True, accepted)
         layout.addWidget(table)
 
         back_btn = QPushButton("Back")
@@ -414,14 +415,13 @@ class MainWindow(QMainWindow):
         self.view_pending_meetings(username)
 
 
-    def createTable(self, agenda : [AgendaItem], username, need_to_accept = False):
-        conflicts = identify_conflicts(agenda)
-        print(conflicts)
+    def createTable(self, agenda : [AgendaItem], username, need_to_accept = False, pending = None):
+        conflicts = identify_conflicts(agenda, pending)
         table = QTableWidget()
         table.setRowCount(len(agenda))
         table.setColumnCount(5) if not need_to_accept else table.setColumnCount(6)
         headings = ["Name", "Description", "Start", "End", "Date"]
-        headings = headings + ["Accept/Decline"] if need_to_accept else headings
+        headings = headings + ["Accept"] if need_to_accept else headings
         table.setHorizontalHeaderLabels(headings)
         for i, item in enumerate(agenda):
             table.setItem(i, 0, QTableWidgetItem(item.name))
@@ -430,11 +430,11 @@ class MainWindow(QMainWindow):
             table.setItem(i, 3, QTableWidgetItem(item.time_end))
             table.setItem(i, 4, QTableWidgetItem(str(item.date)))
             if need_to_accept:
-                button = QPushButton("Accept/Decline")
+                button = QPushButton("Accept")
                 button.clicked.connect(lambda: self.accept_decline(username, i))
                 table.setCellWidget(i, 5, button)
 
-            if i in conflicts:
+            if item.id in conflicts:
                 table.item(i, 0).setBackground(QColor(255, 0, 0))
             else:
                 table.item(i, 0).setBackground(QColor(0, 255, 0))

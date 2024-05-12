@@ -143,19 +143,26 @@ def decline_meeting(username, id):
     meeting = remove_meeting(path, id)
     return False if not meeting else True
 
+def times_clash(start1, end1, start2, end2, date1, date2):
+    return start1 <= end2 and start2 <= end1  and date1 == date2
+
 def identify_conflicts(accepted_meetings: list[AgendaItem], pending_meetings: list[AgendaItem] = None) -> list[int]:
     conflicts = []
-    for i in range(len(accepted_meetings)):
-        for j in range(i+1, len(accepted_meetings)):
-            if accepted_meetings[i].date == accepted_meetings[j].date and accepted_meetings[i].time == accepted_meetings[j].time:
-                conflicts.append(accepted_meetings[i].id)
-                conflicts.append(accepted_meetings[j].id)
     if pending_meetings:
         for i in range(len(accepted_meetings)):
             for j in range(len(pending_meetings)):
-                if accepted_meetings[i].date == pending_meetings[j].date and accepted_meetings[i].time == pending_meetings[j].time:
+                if times_clash(accepted_meetings[i].time_start, accepted_meetings[i].time_end, pending_meetings[j].time_start,
+                               pending_meetings[j].time_end, accepted_meetings[i].date, pending_meetings[j].date):
                     conflicts.append(accepted_meetings[i].id)
                     conflicts.append(pending_meetings[j].id)
+    else:
+        for i in range(len(accepted_meetings)):
+            for j in range(i+1, len(accepted_meetings)):
+                if times_clash(accepted_meetings[i].time_start, accepted_meetings[i].time_end, accepted_meetings[j].time_start,
+                               accepted_meetings[j].time_end, accepted_meetings[i].date, accepted_meetings[j].date):
+                    conflicts.append(accepted_meetings[i].id)
+                    conflicts.append(accepted_meetings[j].id)
+
     return conflicts
 
 
