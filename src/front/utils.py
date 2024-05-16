@@ -24,7 +24,7 @@ def create_group(group_name, selected_users, hierarchical, username):
         return False
 
     selected_users += [username]
-    groups[group_name] = {'users': selected_users, 'hierarchical': hierarchical}
+    groups[group_name] = {'users': selected_users, 'hierarchical': hierarchical, 'admin': username}
     with open(path, 'w') as f:
         json.dump(groups, f)
     return True
@@ -82,8 +82,24 @@ def get_meeting(username,path):
             meetings = json.load(f)
     except FileNotFoundError:
         return []
+
+    try:
+        with open('../data/groups.json','r') as f:
+            groups = json.load(f)
+    except FileNotFoundError:
+        groups = {}
+
+    groups_admin = []
+    for key,value in groups.items():
+        if username == value['admin'] and value['hierarchical']:
+            groups_admin.append(key)
+
+
     return [AgendaItem(meeting['name'], meeting['description'], meeting['time_start'], meeting['time_end'], meeting['date'], ind)
-            for ind, meeting in enumerate(meetings.values()) if username in meeting['participants']]
+            for ind, meeting in enumerate(meetings.values())
+            if username in meeting['participants']
+            or [g for g in meeting['groups'] if g in groups_admin] != []]
+
 def get_meetings(username):
     path = '../data/meetings.json'
     ans =  get_meeting(username,path)

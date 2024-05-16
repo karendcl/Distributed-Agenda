@@ -175,7 +175,6 @@ class MainWindow(QMainWindow):
             msg.setText("Sign up successful")
             msg.exec_()
             self.on_login_click()
-
         else:
             msg = QMessageBox()
             msg.setWindowTitle("Error")
@@ -183,6 +182,9 @@ class MainWindow(QMainWindow):
             msg.exec_()
 
     def create_group(self, username):
+
+        self.setMaximumSize(400, 600)
+        self.setGeometry(100, 100, 400, 600)
 
         all_users = get_all_users(username)
 
@@ -239,11 +241,11 @@ class MainWindow(QMainWindow):
             msg.setIcon(QMessageBox.Critical)
             msg.setText("Group creation failed")
             msg.exec_()
-        self.my_account(username)
 
     def my_account(self, username):
 
-        self.setGeometry(100, 100, 400, 200)
+        self.setMaximumSize(400, 300)
+        self.setGeometry(100, 100, 400, 300)
 
         layout = QVBoxLayout()
 
@@ -273,7 +275,9 @@ class MainWindow(QMainWindow):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
+
     def view_agenda(self, agenda, username):
+        self.setMaximumSize(800, 600)
         self.setGeometry(100, 100, 800, 600)
 
         layout = QVBoxLayout()
@@ -286,13 +290,14 @@ class MainWindow(QMainWindow):
 
         back_btn = QPushButton("Back")
         back_btn.clicked.connect(lambda: self.my_account(username))
-        layout.addWidget(back_btn)
+        layout.addWidget(back_btn, alignment = Qt.AlignCenter)
 
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
     def view_pending_meetings(self, username):
+        self.setMaximumSize(800, 600)
         self.setGeometry(100, 100, 800, 600)
 
         layout = QVBoxLayout()
@@ -307,13 +312,15 @@ class MainWindow(QMainWindow):
 
         back_btn = QPushButton("Back")
         back_btn.clicked.connect(lambda: self.my_account(username))
-        layout.addWidget(back_btn)
+        layout.addWidget(back_btn, alignment = Qt.AlignCenter)
 
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
     def create_meeting(self, username):
+        self.setMaximumSize(400, 600)
+        self.setGeometry(100, 100, 400, 600)
         layout = QVBoxLayout()
 
         label = QLabel("Create Meeting")
@@ -371,11 +378,11 @@ class MainWindow(QMainWindow):
                                                                       time_input.text(), end_time_input.text(), get_Selected_users(list_widget),
                                                                       date_input.selectedDate().toString("yyyy-MM-dd"),
                                                                       get_Selected_users(list_widget_groups), username))
-        layout.addWidget(button_submit)
+        layout.addWidget(button_submit, alignment = Qt.AlignCenter)
 
         back_btn = QPushButton("Back")
         back_btn.clicked.connect(lambda: self.my_account(username))
-        layout.addWidget(back_btn)
+        layout.addWidget(back_btn, alignment = Qt.AlignCenter)
 
         widget = QWidget()
         widget.setLayout(layout)
@@ -383,14 +390,12 @@ class MainWindow(QMainWindow):
 
     def try_create_meeting(self, name, description, time, endtime, users, date, groups, username):
         success = create_meeting(name, description, time,endtime, date, users, groups, username)
-
         msg = QMessageBox()
 
         if success:
             msg.setWindowTitle("Success")
             msg.setText("Meeting created")
             msg.exec_()
-            self.my_account(username)
         else:
             msg.setWindowTitle("Error")
             msg.setText("Meeting creation failed")
