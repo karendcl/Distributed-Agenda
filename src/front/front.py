@@ -83,6 +83,29 @@ class PasswordLineEdit(QLineEdit):
             self.setEchoMode(QLineEdit.Password)
             self.showPassAction.setIcon(self.iconShow)
 
+class QListWidget(QListWidget):
+    def __init__(self, parent = None):
+        super().__init__(parent)
+        self.setStyleSheet("border: 1px solid gray;")
+        self.setSpacing(5)
+
+class QComboBox(QComboBox):
+    def __init__(self, parent = None):
+        super().__init__(parent)
+        self.setStyleSheet("border: 1px solid gray;")
+        self.setFixedHeight(30)
+
+        #set font Calibri, 10
+        font = QFont("Calibri", 10)
+        self.setFont(font)
+
+        #set spacing between options
+        self.view().setSpacing(5)
+
+        self.setStyleSheet("QComboBox::down-arrow {image: url(icons/down-arrow.png);}")
+
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
