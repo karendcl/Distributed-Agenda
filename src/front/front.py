@@ -5,7 +5,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from utils import *
 
-# override QLineEdit to add border
 class QLineEdit(QLineEdit):
     def __init__(self, parent = None):
         super().__init__(parent)
@@ -458,5 +457,4 @@ if __name__ == "__main__":
     window.show()
     sys.exit(app.exec_())
 
-#todo view conflicts taking into consideration duration
 #todo add viewing agenda of others

@@ -160,7 +160,7 @@ def decline_meeting(username, id):
     return False if not meeting else True
 
 def times_clash(start1, end1, start2, end2, date1, date2):
-    return start1 <= end2 and start2 <= end1  and date1 == date2
+    return start1 <= end2 and start2 <= end1 and date1 == date2
 
 def identify_conflicts(accepted_meetings: list[AgendaItem], pending_meetings: list[AgendaItem] = None) -> list[int]:
     conflicts = []
@@ -199,3 +199,5 @@ def get_all_groups():
     except FileNotFoundError:
         return []
     return groups.keys()
+
+# todo once a leader accepts it, all group participants get it
