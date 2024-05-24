@@ -270,12 +270,52 @@ class MainWindow(QMainWindow):
         create_group_btn.clicked.connect(lambda: self.create_group(username))
         layout.addWidget(create_group_btn, alignment=Qt.AlignCenter)
 
+        view_others_agenda_btn = QPushButton("View Other's Agenda")
+        view_others_agenda_btn.clicked.connect(lambda: self.view_others_agenda(username))
+        layout.addWidget(view_others_agenda_btn, alignment=Qt.AlignCenter)
+
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
+    def view_others_agenda(self, username):
+        self.setMaximumSize(400, 300)
+        self.setGeometry(100, 100, 400, 300)
 
-    def view_agenda(self, agenda, username):
+        layout = QVBoxLayout()
+
+        label = QLabel("View Other's Agenda")
+
+        label_username = QLabel("Select user")
+        layout.addWidget(label_username)
+
+        allusers = get_all_users(username)
+        #drop down menu for users
+        list_box = QComboBox()
+        for user in allusers:
+            list_box.addItem(user)
+        layout.addWidget(list_box)
+
+        button_submit = QPushButton("View")
+        button_submit.clicked.connect(lambda: self.intermediate(username, list_box))
+        layout.addWidget(button_submit, alignment = Qt.AlignCenter)
+
+        back_btn = QPushButton("Back")
+        back_btn.clicked.connect(lambda: self.my_account(username))
+        layout.addWidget(back_btn, alignment = Qt.AlignCenter)
+
+        widget = QWidget()
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
+
+    def intermediate(self, username, combo_box):
+        #get the selected user
+        selected_user = combo_box.currentText()
+        self.view_agenda(get_meetings(selected_user), username, selected_user)
+
+
+
+    def view_agenda(self, agenda, username, other = None):
         self.setMaximumSize(800, 600)
         self.setGeometry(100, 100, 800, 600)
 
@@ -284,7 +324,7 @@ class MainWindow(QMainWindow):
         label = QLabel("Agenda")
         layout.addWidget(label)
 
-        table = self.createTable(agenda, username)
+        table = self.createTable(agenda, username) if other is None else self.createTable(agenda, other)
         layout.addWidget(table)
 
         back_btn = QPushButton("Back")
