@@ -22,6 +22,32 @@ class QLabel(QLabel):
         font.setBold(True)
         self.setFont(font)
 
+        style_sheet = "color: maroon;"
+        self.setStyleSheet(style_sheet)
+
+class QTitleLabel(QLabel):
+    def __init__(self, text, parent = None):
+        super().__init__(text, parent)
+        font = QFont("Calibri", 16)
+        font.setBold(True)
+        self.setFont(font)
+        self.setAlignment(Qt.AlignCenter)
+        style_sheet = "text-decoration: underline;"
+        style_sheet += "color: darkred;"
+        self.setStyleSheet(style_sheet)
+
+class QSubTitleLabel(QLabel):
+    def __init__(self, text, parent = None):
+        super().__init__(text, parent)
+        font = QFont("Calibri", 14)
+        font.setBold(True)
+        self.setFont(font)
+        self.setAlignment(Qt.AlignCenter)
+
+        style_sheet = "color: firebrick;"
+        self.setStyleSheet(style_sheet)
+
+
 class QPushButton(QPushButton):
     def __init__(self, text, parent = None):
         super().__init__(text, parent)
@@ -66,13 +92,7 @@ class MainWindow(QMainWindow):
 
         layout = QVBoxLayout()
 
-        label = QLabel("Your personal agenda")
-        label.setAlignment(Qt.AlignCenter)
-        font = QFont("Calibri", 16)
-        font.setBold(True)
-        # label.setStyleSheet("color: blue")
-        label.setFont(font)
-
+        label = QTitleLabel("Your personal agenda")
         layout.addWidget(label)
 
         button_log_in = QPushButton("Log In")
@@ -100,7 +120,7 @@ class MainWindow(QMainWindow):
     def on_login_click(self):
         layout = QVBoxLayout()
 
-        label = QLabel("Log In")
+        label = QTitleLabel("Log In")
 
         label_username = QLabel("Username")
         label_password = QLabel("Password")
@@ -142,7 +162,7 @@ class MainWindow(QMainWindow):
     def on_signup_click(self):
         layout = QVBoxLayout()
 
-        label = QLabel("Sign Up")
+        label = QTitleLabel("Sign Up")
 
         label_username = QLabel("Username")
         label_password = QLabel("Password")
@@ -189,7 +209,7 @@ class MainWindow(QMainWindow):
 
         layout = QVBoxLayout()
 
-        label = QLabel("Create Group")
+        label = QTitleLabel("Create Group")
 
         label_group_name = QLabel("Group Name")
         group_name_input = QLineEdit()
@@ -248,9 +268,9 @@ class MainWindow(QMainWindow):
 
         layout = QVBoxLayout()
 
-        label = QLabel("My Account")
+        label = QTitleLabel("My Account")
 
-        label_username = QLabel(f"Username: {username}")
+        label_username = QSubTitleLabel(f"Username: {username}")
 
         view_agenda_btn = QPushButton("View Agenda")
         view_agenda_btn.clicked.connect(lambda: self.view_agenda(get_meetings(username), username))
@@ -284,7 +304,8 @@ class MainWindow(QMainWindow):
 
         layout = QVBoxLayout()
 
-        label = QLabel("View Other's Agenda")
+        label = QTitleLabel("View Other's Agenda")
+        layout.addWidget(label)
 
         label_username = QLabel("Select user")
         layout.addWidget(label_username)
@@ -313,15 +334,13 @@ class MainWindow(QMainWindow):
         selected_user = combo_box.currentText()
         self.view_agenda(get_meetings(selected_user), username, selected_user)
 
-
-
     def view_agenda(self, agenda, username, other = None):
         self.setMaximumSize(800, 600)
         self.setGeometry(100, 100, 800, 600)
 
         layout = QVBoxLayout()
 
-        label = QLabel("Agenda")
+        label = QTitleLabel(f"Agenda: {other if other is not None else username}")
         layout.addWidget(label)
 
         table = self.createTable(agenda, username) if other is None else self.createTable(agenda, other)
@@ -341,7 +360,7 @@ class MainWindow(QMainWindow):
 
         layout = QVBoxLayout()
 
-        label = QLabel("Pending Meetings")
+        label = QTitleLabel("Pending Meetings")
         layout.addWidget(label)
 
         accepted = get_meetings(username)
@@ -362,7 +381,7 @@ class MainWindow(QMainWindow):
         self.setGeometry(100, 100, 400, 600)
         layout = QVBoxLayout()
 
-        label = QLabel("Create Meeting")
+        label = QTitleLabel("Create Meeting")
 
         label_meeting_name = QLabel("Meeting Name")
         meeting_name_input = QLineEdit()
@@ -497,4 +516,3 @@ if __name__ == "__main__":
     window.show()
     sys.exit(app.exec_())
 
-#todo add viewing agenda of others
