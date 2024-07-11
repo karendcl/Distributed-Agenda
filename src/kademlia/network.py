@@ -19,22 +19,22 @@ log = logging.getLogger(__name__)
 
 class Server:
     """
-    High level view of a node instance.  This is the object that should be
-    created to start listening as an active node on the network.
+    Vista de alto nivel de una instancia de nodo. Este es el objeto que debe
+    crearse para comenzar a escuchar como un nodo activo en la red.
     """
 
     protocol_class = KademliaProtocol
 
     def __init__(self, ip, ksize=3, alpha=2, node_id=None, storage=None):
         """
-        Create a server instance.  This will start listening on the given port.
+        Crea una instancia de server. Este comenzará a escuchar en el puerto dado.
 
         Args:
-            ksize (int): The k parameter from the paper
-            alpha (int): The alpha parameter from the paper
-            node_id: The id for this node on the network.
-            storage: An instance that implements the interface
-                     :class:`~kademlia.storage.IStorage`
+            ksize (int): El parámetro k del documento
+            alpha (int): El parámetro alpha del documento
+            node_id: El ID para este nodo en la red.
+            storage: Una instancia que implementa la interfaz
+                    :class:`~kademlia.storage.IStorage`
         """
         self.id = uuid.uuid4()
         self.ksize = ksize
@@ -47,6 +47,9 @@ class Server:
         self.save_state_loop = None
 
     def stop(self):
+        """
+        Detiene el servidor.
+        """
         if self.transport is not None:
             self.transport.close()
 
@@ -57,13 +60,16 @@ class Server:
             self.save_state_loop.cancel()
 
     def _create_protocol(self):
+        """
+        Crea una instancia del protocolo Kademlia.
+        """
         return self.protocol_class(self.node, self.storage, self.ksize)
 
     async def listen(self, port, interface='0.0.0.0'):
         """
-        Start listening on the given port.
+        Comienza a escuchar en el puerto dado.
 
-        Provide interface="::" to accept ipv6 address
+        Proporciona interface="::" para aceptar direcciones IPv6
         """
         loop = asyncio.get_event_loop()
         listen = loop.create_datagram_endpoint(self._create_protocol,
@@ -76,6 +82,9 @@ class Server:
         self.refresh_table()
 
     def refresh_table(self):
+        """
+        Actualiza la tabla de enrutamiento.
+        """
         log.debug("Refreshing routing table")
         asyncio.ensure_future(self._refresh_table())
         loop = asyncio.get_event_loop()
@@ -83,8 +92,7 @@ class Server:
 
     async def _refresh_table(self):
         """
-        Refresh buckets that haven't had any lookups in the last hour
-        (per section 2.3 of the paper).
+        Actualiza los buckets que no han tenido ninguna búsqueda en la última hora
         """
         results = []
         for node_id in self.protocol.get_refresh_ids():
@@ -92,7 +100,7 @@ class Server:
             nearest = self.protocol.router.find_neighbors(node, self.alpha)
             log.debug('NEAREST IN REFRESH TABLE: %s', nearest)
             spider = NodeSpiderCrawl(self.protocol, node, nearest,
-                                     self.ksize, self.alpha)
+                                    self.ksize, self.alpha)
             results.append(spider.find())
 
         await asyncio.gather(*results)
@@ -103,24 +111,24 @@ class Server:
 
     def bootstrappable_neighbors(self):
         """
-        Get a :class:`list` of (ip, port) :class:`tuple` pairs suitable for
-        use as an argument to the bootstrap method.
+        Obtiene una lista de pares (ip, port) aptos para
+        usarse como argumento para el método bootstrap.
 
-        The server should have been bootstrapped
-        already - this is just a utility for getting some neighbors and then
-        storing them if this server is going down for a while.  When it comes
-        back up, the list of nodes can be used to bootstrap.
+        El servidor debería haber sido iniciado
+        ya - esta es solo una utilidad para obtener algunos vecinos y luego
+        almacenarlos si este servidor se está apagando por un tiempo. Cuando vuelve
+        a estar activo, la lista de nodos se puede usar para iniciar el servidor.
         """
         neighbors = self.protocol.router.find_neighbors(self.node)
         return [tuple(n)[-2:] for n in neighbors]
 
     async def bootstrap(self, addrs):
         """
-        Bootstrap the server by connecting to other known nodes in the network.
+        Inicia el servidor conectándose a otros nodos conocidos en la red.
 
         Args:
-            addrs: A `list` of (ip, port) `tuple` pairs.  Note that only IP
-                   addresses are acceptable - hostnames will cause an error.
+            addrs: Una lista de pares (ip, port). Ten en cuenta que solo las direcciones IP
+                son aceptables - los nombres de host causarán un error.
         """
         log.debug("Attempting to bootstrap node with %i initial contacts",
                   len(addrs))
@@ -132,15 +140,18 @@ class Server:
         return await spider.find()
 
     async def bootstrap_node(self, addr):
+        """
+        Envía una solicitud de ping a un nodo dado para verificar su disponibilidad.
+        """
         result = await self.protocol.ping(addr, self.node.id)
         return Node(result[1], addr[0], addr[1]) if result[0] else None
 
     async def get(self, key, refresh=False):
         """
-        Get a key if the network has it.
+        Obtiene una clave si la red la tiene.
 
         Returns:
-            :class:`None` if not found, the value otherwise.
+            :class:`None` si no se encuentra, el valor en caso contrario.
         """
         log.info("Looking up key %s", key)
         dkey = key
@@ -174,7 +185,7 @@ class Server:
 
     async def set(self, key, value):
         """
-        Set the given string key to the given value in the network.
+        Asigna la clave de cadena dada al valor dado en la red.
         """
         if not check_dht_value_type(value):
             raise TypeError(
@@ -186,8 +197,7 @@ class Server:
 
     async def set_digest(self, dkey, value):
         """
-        Set the given SHA1 digest key (bytes) to the given value in the
-        network.
+        Asigna la clave SHA1 dada (bytes) al valor dado en la red.
         """
         node = Node(dkey)
 
@@ -212,8 +222,7 @@ class Server:
 
     async def set_refresh(self, dkey, value):
         """
-        Set the given SHA1 digest key (bytes) to the given value in the
-        network.
+        Asigna la clave SHA1 dada (bytes) al valor dado en la red.
         """
         node = Node(dkey)
 
@@ -235,8 +244,8 @@ class Server:
 
     def save_state(self, fname):
         """
-        Save the state of this node (the alpha/ksize/id/immediate neighbors)
-        to a cache file with the given fname.
+        Guarda el estado de este nodo (alfa/ksize/id/vecinos inmediatos)
+        en un archivo de caché con el nombre dado fname.
         """
         log.info("Saving state to %s", fname)
         data = {
@@ -254,9 +263,9 @@ class Server:
     @classmethod
     async def load_state(cls, fname, port, interface='0.0.0.0'):
         """
-        Load the state of this node (the alpha/ksize/id/immediate neighbors)
-        from a cache file with the given fname and then bootstrap the node
-        (using the given port/interface to start listening/bootstrapping).
+        Carga el estado de este nodo (alfa/ksize/id/vecinos inmediatos)
+        desde un archivo de caché con el nombre dado fname y luego inicia el nodo
+        (usando el puerto/interfaz dado para comenzar a escuchar/iniciar).
         """
         log.info("Loading state from %s", fname)
         with open(fname, 'rb') as file:
@@ -269,13 +278,12 @@ class Server:
 
     def save_state_regularly(self, fname, frequency=600):
         """
-        Save the state of node with a given regularity to the given
-        filename.
+        Guarda el estado del nodo con una regularidad dada en el archivo dado.
 
         Args:
-            fname: File name to save retularly to
-            frequency: Frequency in seconds that the state should be saved.
-                        By default, 10 minutes.
+            fname: Nombre de archivo para guardar regularmente
+            frequency: Frecuencia en segundos con la que se debe guardar el estado.
+                        De forma predeterminada, 10 minutos.
         """
         self.save_state(fname)
         loop = asyncio.get_event_loop()
@@ -287,8 +295,8 @@ class Server:
 
 def check_dht_value_type(value):
     """
-    Checks to see if the type of the value is a valid type for
-    placing in the dht.
+    Comprueba si el tipo del valor es un tipo válido para
+    colocar en el DHT.
     """
     typeset = [
         int,

@@ -12,7 +12,18 @@ log = logging.getLogger(__name__)
 
 
 class KademliaProtocol(RPCProtocol):
+    """
+    Implementa el protocolo Kademlia utilizando RPC UDP para la comunicación entre nodos.
+    """
     def __init__(self, source_node, storage, ksize):
+        """
+        Inicializa el protocolo Kademlia.
+
+        Args:
+            source_node: El nodo actual.
+            storage: El almacenamiento local del nodo.
+            ksize: El tamaño de la tabla de enrutamiento.
+        """
         RPCProtocol.__init__(self)
         self.router = RoutingTable(self, ksize, source_node)
         self.storage = storage
@@ -20,7 +31,7 @@ class KademliaProtocol(RPCProtocol):
 
     def get_refresh_ids(self):
         """
-        Get ids to search for to keep old buckets up to date.
+        Obtiene una lista de IDs de nodos para actualizar los buckets inactivos en la tabla de enrutamiento.
         """
         ids = []
         
@@ -35,16 +46,25 @@ class KademliaProtocol(RPCProtocol):
         
         return ids
 
-    def rpc_stun(self, sender):  
+    def rpc_stun(self, sender):
+        """
+        Método RPC para `stun`.  Devuelve la dirección del remitente.
+        """  
         return sender
 
     def rpc_ping(self, sender, nodeid):
+        """
+        Método RPC para `ping`. Verifica si un nodo está activo.
+        """
         source = Node(nodeid, sender[0], sender[1])
         self.welcome_if_new(source)
         
         return self.source_node.id
 
     def rpc_refresh(self, sender, nodeid, key, value):
+        """
+        Método RPC para `refresh`.  Actualiza el valor asociado con una clave en otro nodo.
+        """
         source = Node(nodeid, sender[0], sender[1])
         self.welcome_if_new(source)
 
@@ -54,6 +74,9 @@ class KademliaProtocol(RPCProtocol):
         return True
 
     def rpc_store(self, sender, nodeid, key, value):
+        """
+        Método RPC para `store`. Almacena un valor en otro nodo.
+        """
         source = Node(nodeid, sender[0], sender[1])
         self.welcome_if_new(source)
 
@@ -64,7 +87,9 @@ class KademliaProtocol(RPCProtocol):
         return True
 
     def rpc_find_node(self, sender, nodeid, key):
-        
+        """
+        Método RPC para `find_node`. Encuentra los vecinos más cercanos a una clave.
+        """
         log.info("finding neighbors of %i in local table",
                 int(nodeid, 16))
         source = Node(nodeid, sender[0], sender[1])
@@ -75,7 +100,9 @@ class KademliaProtocol(RPCProtocol):
         return list(map(tuple, neighbors))
 
     def rpc_find_value(self, sender, nodeid, key):
-        
+        """
+        Método RPC para `find_value`. Encuentra el valor asociado con una clave.
+        """
         source = Node(nodeid, sender[0], sender[1])
         self.welcome_if_new(source)
         value = self.storage.get(key, None)
@@ -84,13 +111,16 @@ class KademliaProtocol(RPCProtocol):
         
         return {'value': value}
 
+    #Metodos asincronos para llamar a otros metodos
     async def call_find_node(self, node_to_ask, node_to_find):
+        
         address = (node_to_ask.ip, node_to_ask.port)
         result = await self.find_node(address, self.source_node.id,
                                     node_to_find.id)
         return self.handle_call_response(result, node_to_ask)
 
     async def call_find_value(self, node_to_ask, node_to_find):
+        
         address = (node_to_ask.ip, node_to_ask.port)
         result = await self.find_value(address, self.source_node.id,
                                     node_to_find.id)
@@ -118,19 +148,18 @@ class KademliaProtocol(RPCProtocol):
     def welcome_if_new(self, node):
         log.info("node %s", node)
         """
-        Given a new node, send it all the keys/values it should be storing,
-        then add it to the routing table.
+        Si un nodo es nuevo, se le envían todos los datos que debería almacenar
+        y luego se agrega a la tabla de enrutamiento.
 
-        @param node: A new node that just joined (or that we just found out
-        about).
+        Args:
+            node: Un nuevo nodo que se acaba de unir (o del que acabamos de enterarnos).
 
-        Process:
-        For each key in storage, get k closest nodes.  If newnode is closer
-        than the furtherst in that list, and the node for this server
-        is closer than the closest in that list, then store the key/value
-        on the new node (per section 2.5 of the paper)
+        Proceso:
+        Para cada clave en el almacenamiento, obtener k nodos más cercanos.  Si el nuevo nodo está más cerca
+        que el más lejano en esa lista, y el nodo de este servidor
+        está más cerca que el más cercano en esa lista, entonces almacenar la clave/valor
+        en el nuevo nodo (Guiandome por el paper de Kademlia).
         """
-        
         if not self.router.is_new_node(node):
             log.info("already in router")
             return
@@ -159,8 +188,8 @@ class KademliaProtocol(RPCProtocol):
 
     def handle_call_response(self, result, node):
         """
-        If we get a response, add the node to the routing table.  If
-        we get no response, make sure it's removed from the routing table.
+        Si recibimos una respuesta, agregamos el nodo a la tabla de enrutamiento. Si
+        no recibimos una respuesta, nos aseguramos de que se elimine de la tabla de enrutamiento.
         """
         if not result[0]:
             log.warning("no response from %s, removing from router", node)

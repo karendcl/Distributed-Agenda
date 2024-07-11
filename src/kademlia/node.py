@@ -8,20 +8,17 @@ log = logging.getLogger(__name__)
 
 class Node:
     """
-    Simple object to encapsulate the concept of a Node (minimally an ID, but
-    also possibly an IP and port if this represents a node on the network).
-    This class should generally not be instantiated directly, as it is a low
-    level construct mostly used by the router.
+    Representa un nodo en la red Kademlia.
     """
 
     def __init__(self, node_id, ip=None, port=None):
         """
-        Create a Node instance.
+        Crea una instancia de Node.
 
         Args:
-            node_id (int): A value between 0 and 2^160
-            ip (string): Optional IP address where this Node lives
-            port (int): Optional port for this Node (set when IP is set)
+            node_id (int): El ID del nodo.
+            ip (str): La dirección IP del nodo (opcional).
+            port (int): El puerto del nodo (opcional).
         """
         self.id = node_id  
         log.debug("NODE CREATED WITH ID: %s", self.id)
@@ -31,38 +28,48 @@ class Node:
         log.debug("NODE'S LONG ID: %s", self.long_id)
 
     def same_home_as(self, node):
+        """
+        Verifica si este nodo comparte la misma dirección IP y puerto que otro nodo.
+        """ 
         return self.ip == node.ip and self.port == node.port
 
     def distance_to(self, node):
         """
-        Get the distance between this node and another.
+        Calcula la distancia XOR entre este nodo y otro nodo.
         """
         return self.long_id ^ node.long_id
 
     def __iter__(self):
         """
-        Enables use of Node as a tuple - i.e., tuple(node) works.
+        Permite iterar sobre el nodo como una tupla (ID, IP, puerto).
         """
         return iter([self.id, self.ip, self.port])
 
     def __repr__(self):
+        """
+        Devuelve una representación de cadena del nodo.
+        """
         return repr([self.long_id, self.ip, self.port])
 
     def __str__(self):
+        """
+        Devuelve una representación de cadena del nodo en formato IP:puerto.
+        """
         return "%s:%s" % (self.ip, str(self.port))
 
 
 class NodeHeap:
     """
-    A heap of nodes ordered by distance to a given node.
+    Un heap de nodos ordenados por distancia a un nodo dado.
     """
 
     def __init__(self, node, maxsize):
         """
         Constructor.
 
-        @param node: The node to measure all distnaces from.
-        @param maxsize: The maximum size that this heap can grow to.
+        Args:
+            node: El nodo desde el cual se mide la distancia.
+            maxsize: El tamaño máximo del montón.
         """
         self.node = node
         self.heap = []
@@ -71,11 +78,7 @@ class NodeHeap:
 
     def remove(self, peers):
         """
-        Remove a list of peer ids from this heap.  Note that while this
-        heap retains a constant visible size (based on the iterator), it's
-        actual size may be quite a bit larger than what's exposed.  Therefore,
-        removal of nodes may not change the visible size as previously added
-        nodes suddenly become visible.
+        Elimina una lista de IDs de nodos del heap. 
         """
         peers = set(peers)
         if not peers:
@@ -87,28 +90,44 @@ class NodeHeap:
         self.heap = nheap
 
     def get_node(self, node_id):
+        """
+        Obtiene un nodo del montón por su ID.
+        """
         for _, node in self.heap:
             if node.id == node_id:
                 return node
         return None
 
     def have_contacted_all(self):
+        """
+        Verifica si todos los nodos del montón han sido contactados.
+        """
         return len(self.get_uncontacted()) == 0
 
     def get_ids(self):
+        """
+        Obtiene una lista de los IDs de los nodos en el montón.
+        """
         return [n.id for n in self]
 
     def mark_contacted(self, node):
+        """
+        Marca un nodo como contactado.
+        """
         self.contacted.add(node.id)
 
     def popleft(self):
+        """
+        Elimina y devuelve el nodo más cercano al nodo actual.
+        """
         return heapq.heappop(self.heap)[1] if self else None
 
     def push(self, nodes):
         """
-        Push nodes onto heap.
+        Agrega nodos al heap.
 
-        @param nodes: This can be a single item or a C{list}.
+        Args:
+            nodes: Un nodo o una lista de nodos.
         """
         if not isinstance(nodes, list):
             nodes = [nodes]
@@ -119,17 +138,29 @@ class NodeHeap:
                 heapq.heappush(self.heap, (distance, node))
 
     def __len__(self):
+        """
+        Devuelve el tamaño del heap.
+        """
         return min(len(self.heap), self.maxsize)
 
     def __iter__(self):
+        """
+        Permite iterar sobre los nodos del heap.
+        """
         nodes = heapq.nsmallest(self.maxsize, self.heap)
         return iter(map(itemgetter(1), nodes))
 
     def __contains__(self, node):
+        """
+        Verifica si un nodo está presente en el heap.
+        """
         for _, other in self.heap:
             if node.id == other.id:
                 return True
         return False
 
     def get_uncontacted(self):
+        """
+        Obtiene una lista de los nodos en el heap que aún no han sido contactados.
+        """
         return [n for n in self if n.id not in self.contacted]

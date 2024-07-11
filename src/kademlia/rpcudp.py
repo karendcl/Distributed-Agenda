@@ -1,6 +1,3 @@
-"""
-Package for interacting on the network via a Async Protocol
-"""
 import asyncio
 import logging
 import os
@@ -14,35 +11,44 @@ LOG = logging.getLogger(__name__)
 
 class MalformedMessage(Exception):
     """
-    Message does not contain what is expected.
+    El mensaje no contiene lo que se espera.
     """
 
 
 class RPCProtocol(asyncio.DatagramProtocol):
     """
-    Protocol implementation using msgpack to encode messages and asyncio
-    to handle async sending / recieving.
+    Implementación del protocolo usando msgpack para codificar mensajes y asyncio
+    para manejar el envío y la recepción asíncronos.
     """
 
     def __init__(self, wait_timeout=5):
         """
-        Create a protocol instance.
+        Crea una instancia de protocolo.
 
         Args:
-            wait_timeout (int): Time to wait for a response before giving up
+            wait_timeout (int): Tiempo de espera para una respuesta antes de darse por vencido.
         """
         self._wait_timeout = wait_timeout
         self._outstanding = {}
         self.transport = None
 
     def connection_made(self, transport):
+        """
+        Se llama cuando se establece la conexión.
+        """
         self.transport = transport
 
     def datagram_received(self, data, addr):
+        """
+        Se llama cuando se recibe un datagrama.
+        """
         LOG.debug("received datagram from %s", addr)
         asyncio.ensure_future(self._solve_datagram(data, addr))
 
     async def _solve_datagram(self, datagram, address):
+        """
+        Procesa el datagrama recibido.
+        """
         if len(datagram) < 22:
             LOG.warning("received datagram too small from %s,"
                         " ignoring", address)
@@ -59,7 +65,9 @@ class RPCProtocol(asyncio.DatagramProtocol):
             LOG.debug("Received unknown message from %s, ignoring", address)
 
     def _accept_response(self, msg_id, data, address):
-        
+        """
+        Procesa una respuesta de una solicitud.
+        """
         msgargs = (b64encode(msg_id), address)
         
         if msg_id not in self._outstanding:
@@ -76,7 +84,9 @@ class RPCProtocol(asyncio.DatagramProtocol):
         del self._outstanding[msg_id]
 
     async def _accept_request(self, msg_id, data, address):
-        
+        """
+        Procesa una solicitud de otro nodo.
+        """
         if not isinstance(data, list) or len(data) != 2:
             raise MalformedMessage("Could not read packet: %s" % data)
         
@@ -100,6 +110,9 @@ class RPCProtocol(asyncio.DatagramProtocol):
         self.transport.sendto(txdata, address)
 
     def _timeout(self, msg_id):
+        """
+        Se llama cuando se agota el tiempo de espera para una respuesta.
+        """
         args = (b64encode(msg_id), self._wait_timeout)
         
         LOG.error("Did not receive reply for msg "
@@ -111,17 +124,17 @@ class RPCProtocol(asyncio.DatagramProtocol):
 
     def __getattr__(self, name):
         """
-        If name begins with "_" or "rpc_", returns the value of
-        the attribute in question as normal.
+        Si el nombre comienza con "_" o "rpc_", devuelve el valor del
+        atributo en cuestión como de costumbre.
 
-        Otherwise, returns the value as normal *if* the attribute
-        exists, but does *not* raise AttributeError if it doesn't.
+        De lo contrario, devuelve el valor como de costumbre *si* el atributo
+        existe, pero *no* lanza AttributeError si no lo hace.
 
-        Instead, returns a closure, func, which takes an argument
-        "address" and additional arbitrary args (but not kwargs).
+        En su lugar, devuelve una clausura, func, que toma un argumento
+        "address" y argumentos arbitrarios adicionales (pero no kwargs).
 
-        func attempts to call a remote method "rpc_{name}",
-        passing those args, on a node reachable at address.
+        func intenta llamar a un método remoto "rpc_{name}",
+        pasando esos argumentos, en un nodo accesible en address.
         """
         if name.startswith("_") or name.startswith("rpc_"):
             return getattr(super(), name)

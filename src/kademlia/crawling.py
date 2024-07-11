@@ -10,22 +10,21 @@ log = logging.getLogger(__name__)
 
 class SpiderCrawl:
     """
-    Crawl the network and look for given 160-bit keys.
+    Rastrea la red Kademlia en busca de claves de 160 bits.
     """
 
     def __init__(self, protocol, node, peers, ksize, alpha):
         """
-        Create a new C{SpiderCrawl}er.
+        Crea un nuevo objeto SpiderCrawl para rastrear la red Kademlia.
 
         Args:
-            protocol: A :class:`~kademlia.protocol.KademliaProtocol` instance.
-            node: A :class:`~kademlia.node.Node` representing the key we're
-                  looking for
-            peers: A list of :class:`~kademlia.node.Node` instances that
-                   provide the entry point for the network
-            ksize: The value for k based on the paper
-            alpha: The value for alpha based on the paper
+            protocol: Una instancia del protocolo Kademlia.
+            node: Un nodo que representa la clave que se está buscando.
+            peers: Una lista de nodos que se utilizan como punto de entrada a la red.
+            ksize: El valor de k para el conjunto de nodos más cercanos.
+            alpha: El valor de alpha para el número de nodos contactados por iteración.
         """
+
         self.protocol = protocol
         self.ksize = ksize
         self.alpha = alpha
@@ -37,19 +36,18 @@ class SpiderCrawl:
 
     async def _find(self, rpcmethod):
         """
-        Get either a value or list of nodes.
+        Busca un valor o una lista de nodos.
 
         Args:
-            rpcmethod: The protocol's callfindValue or call_find_node.
+            rpcmethod: El método RPC a utilizar (por ejemplo, call_find_value o call_find_node).
 
-        The process:
-          1. calls find_* to current ALPHA nearest not already queried nodes,
-             adding results to current nearest list of k nodes.
-          2. current nearest list needs to keep track of who has been queried
-             already sort by nearest, keep KSIZE
-          3. if list is same as last time, next call should be to everyone not
-             yet queried
-          4. repeat, unless nearest list has all been queried, then ur done
+        El proceso de búsqueda:
+          1. Llama a find_* para los ALPHA nodos más cercanos que aún no han sido interrogados,
+             agregando los resultados al conjunto actual de nodos más cercanos.
+          2. El conjunto de nodos más cercanos debe llevar un registro de quién ha sido interrogado,
+             ordenado por cercanía y manteniendo solo KSIZE nodos.
+          3. Si el conjunto es el mismo que en la última iteración, la próxima llamada debe ser a todos los nodos que aún no han sido interrogados.
+          4. Repite el proceso hasta que todos los nodos del conjunto más cercano hayan sido interrogados.
         """
         log.info("crawling network with nearest: %s", str(tuple(self.nearest)))
         count = self.alpha
@@ -75,13 +73,13 @@ class ValueSpiderCrawl(SpiderCrawl):
 
     async def find(self):
         """
-        Find either the closest nodes or the value requested.
+        Encuentra el valor solicitado o los nodos más cercanos.
         """
         return await self._find(self.protocol.call_find_value)
 
     async def _nodes_found(self, responses):
         """
-        Handle the result of an iteration in _find.
+        Maneja el resultado de una iteración de la búsqueda.
         """
         toremove = []
         found_values = []
@@ -105,10 +103,8 @@ class ValueSpiderCrawl(SpiderCrawl):
 
     async def _handle_found_values(self, values):
         """
-        We got some values!  Exciting.  But let's make sure
-        they're all the same or freak out a little bit.  Also,
-        make sure we tell the nearest node that *didn't* have
-        the value to store it.
+        Le informamos al nodo más cercano que *no* tenía
+        el valor para almacenarlo.
         """
         log.debug(f'!!!!!!!!! VALUES !!!!!!!!!!!! {values}')
         value = max(values, key=lambda x: x[0])
@@ -122,13 +118,13 @@ class ValueSpiderCrawl(SpiderCrawl):
 class NodeSpiderCrawl(SpiderCrawl):
     async def find(self):
         """
-        Find the closest nodes.
+        Encuentra los nodos más cercanos.
         """
         return await self._find(self.protocol.call_find_node)
 
     async def _nodes_found(self, responses):
         """
-        Handle the result of an iteration in _find.
+        Maneja el resultado de una iteración de la búsqueda.
         """
         toremove = []
         for peerid, response in responses.items():
@@ -147,18 +143,18 @@ class NodeSpiderCrawl(SpiderCrawl):
 class RPCFindResponse:
     def __init__(self, response):
         """
-        A wrapper for the result of a RPC find.
+        Un wrapper para el resultado de una búsqueda RPC.
 
         Args:
-            response: This will be a tuple of (<response received>, <value>)
-                    where <value> will be a list of tuples if not found or
-                    a dictionary of {'value': v} where v is the value desired
+            response: Tupla de (<respuesta recibida>, <valor>)
+                      donde <valor> es una lista de tuplas si no se encontró o
+                      un diccionario de {'valor': v} donde v es el valor deseado
         """
         self.response = response
 
     def happened(self):
         """
-        Did the other host actually respond?
+        ¿El otro host realmente respondió?
         """
         return self.response[0]
 
@@ -170,8 +166,7 @@ class RPCFindResponse:
 
     def get_node_list(self):
         """
-        Get the node list in the response.  If there's no value, this should
-        be set.
+        Obtener la lista de nodos en la respuesta.  Si no hay valor, se establece.
         """
         nodelist = self.response[1] or []
         return [Node(*nodeple) for nodeple in nodelist]
