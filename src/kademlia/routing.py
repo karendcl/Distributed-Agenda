@@ -1,100 +1,99 @@
+import heapq
+import time
+import operator
+import asyncio
 import logging
 
+from itertools import chain
+from collections import OrderedDict
+from kademlia.utils import shared_prefix, bytes_to_bit_string
 
-log = logging.getLogger(__name__) 
+log = logging.getLogger(__name__)
 
 class KBucket:
     def __init__(self, rangeLower, rangeUpper, ksize, replacementNodeFactor=5):
-        raise NotImplementedError
-
+        self.range = (rangeLower, rangeUpper)
+        self.nodes = OrderedDict()
+        self.replacement_nodes = OrderedDict()
+        self.touch_last_updated()
+        self.ksize = ksize
+        self.max_replacement_nodes = self.ksize * replacementNodeFactor
 
     def touch_last_updated(self):
-        raise NotImplementedError
-
+        self.last_updated = time.monotonic()
 
     def get_nodes(self):
-        raise NotImplementedError
-
+        return list(self.nodes.values())
 
     def split(self):
-        raise NotImplementedError
+        midpoint = (self.range[0] + self.range[1]) // 2
+        one = KBucket(self.range[0], midpoint, self.ksize)
+        two = KBucket(midpoint + 1, self.range[1], self.ksize)
+        nodes = chain(self.nodes.values(), self.replacement_nodes.values())
+        
+        for node in nodes:
+            bucket = one if node.long_id <= midpoint else two
+            bucket.add_node(node)
 
+        return (one, two)
 
     def remove_node(self, node):
-        raise NotImplementedError
+        if node.id in self.replacement_nodes:
+            del self.replacement_nodes[node.id]
 
+        if node.id in self.nodes:
+            del self.nodes[node.id]
+
+            if self.replacement_nodes:
+                newnode_id, newnode = self.replacement_nodes.popitem()
+                self.nodes[newnode_id] = newnode
 
     def has_in_range(self, node):
-        raise NotImplementedError
-
+        return self.range[0] <= node.long_id <= self.range[1]
 
     def is_new_node(self, node):
-        raise NotImplementedError
+        for n in self.get_nodes():
+            if node.id == n.id and n.port == node.port:
+                return False
+        return True
 
     def add_node(self, node):
-        raise NotImplementedError
+        """
+        Add a C{Node} to the C{KBucket}.  Return True if successful,
+        False if the bucket is full.
 
+        If the bucket is full, keep track of node in a replacement list,
+        per section 4.1 of the paper.
+        """
+        
+        if node.id in self.nodes:
+            log.debug("NODE %s ALREADY IN BUCKET", node)
+            del self.nodes[node.id]
+            self.nodes[node.id] = node
+        elif len(self) < self.ksize:
+            self.nodes[node.id] = node
+        else:
+            if node.id in self.replacement_nodes:
+                del self.replacement_nodes[node.id]
+            self.replacement_nodes[node.id] = node
+            while len(self.replacement_nodes) > self.max_replacement_nodes:
+                self.replacement_nodes.popitem(last=False)
+            return False
+        return True
 
     def depth(self):
-        raise NotImplementedError
-
+        vals = self.nodes.values()
+        log.debug("vals in depth function KBUCKET: %s", vals)
+        sprefix = shared_prefix([bytes_to_bit_string(n.id) for n in vals])
+        return len(sprefix)
 
     def head(self):
-        raise NotImplementedError
-
+        return list(self.nodes.values())[0]
 
     def __getitem__(self, node_id):
-        raise NotImplementedError
-
+        return self.nodes.get(node_id, None)
 
     def __len__(self):
-        raise NotImplementedError
+        return len(self.nodes)
 
 
-
-class TableTraverser:
-    def __init__(self, table, startNode):
-        raise NotImplementedError
-
-
-    def __iter__(self):
-        raise NotImplementedError
-
-
-    def __next__(self):
-        raise NotImplementedError
-
-
-
-class RoutingTable:
-    def __init__(self, protocol, ksize, node):
-        raise NotImplementedError
-
-
-    def flush(self):
-        raise NotImplementedError
-
-
-    def split_bucket(self, index):
-        raise NotImplementedError
-
-
-    def lonely_buckets(self):
-        raise NotImplementedError
-
-
-    def remove_contact(self, node):
-        raise NotImplementedError
-
-
-    def is_new_node(self, node):
-        raise NotImplementedError
-
-    def add_contact(self, node):
-        raise NotImplementedError
-
-    def get_bucket_for(self, node):
-        raise NotImplementedError
-
-    def find_neighbors(self, node, k=None, exclude=None):
-        raise NotImplementedError
