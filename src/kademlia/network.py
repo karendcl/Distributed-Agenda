@@ -7,7 +7,7 @@ import logging
 from kademlia.protocol import KademliaProtocol
 
 
-log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+log = logging.getLogger(__name__) 
 
 
 # pylint: disable=too-many-instance-attributes

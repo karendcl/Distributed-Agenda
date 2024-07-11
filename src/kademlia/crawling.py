@@ -3,7 +3,7 @@ import logging
 from kademlia.node import Node, NodeHeap
 
 
-log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+log = logging.getLogger(__name__)  
 
 
 # pylint: disable=too-few-public-methods
