@@ -1,24 +1,68 @@
+from collections import Counter
 import logging
 
 from kademlia.node import Node, NodeHeap
+from kademlia.utils import gather_dict
 
 
 log = logging.getLogger(__name__)  
 
 
-# pylint: disable=too-few-public-methods
 class SpiderCrawl:
     """
     Crawl the network and look for given 160-bit keys.
     """
 
     def __init__(self, protocol, node, peers, ksize, alpha):
-        raise NotImplementedError
+        """
+        Create a new C{SpiderCrawl}er.
 
+        Args:
+            protocol: A :class:`~kademlia.protocol.KademliaProtocol` instance.
+            node: A :class:`~kademlia.node.Node` representing the key we're
+                  looking for
+            peers: A list of :class:`~kademlia.node.Node` instances that
+                   provide the entry point for the network
+            ksize: The value for k based on the paper
+            alpha: The value for alpha based on the paper
+        """
+        self.protocol = protocol
+        self.ksize = ksize
+        self.alpha = alpha
+        self.node = node
+        self.nearest = NodeHeap(self.node, self.ksize)
+        self.last_ids_crawled = []
+        log.info("creating spider with peers: %s", peers)
+        self.nearest.push(peers)
 
     async def _find(self, rpcmethod):
-        raise NotImplementedError
+        """
+        Get either a value or list of nodes.
 
+        Args:
+            rpcmethod: The protocol's callfindValue or call_find_node.
+
+        The process:
+          1. calls find_* to current ALPHA nearest not already queried nodes,
+             adding results to current nearest list of k nodes.
+          2. current nearest list needs to keep track of who has been queried
+             already sort by nearest, keep KSIZE
+          3. if list is same as last time, next call should be to everyone not
+             yet queried
+          4. repeat, unless nearest list has all been queried, then ur done
+        """
+        log.info("crawling network with nearest: %s", str(tuple(self.nearest)))
+        count = self.alpha
+        if self.nearest.get_ids() == self.last_ids_crawled:
+            count = len(self.nearest)
+        self.last_ids_crawled = self.nearest.get_ids()
+
+        dicts = {}
+        for peer in self.nearest.get_uncontacted()[:count]:
+            dicts[peer.id] = rpcmethod(peer, self.node)
+            self.nearest.mark_contacted(peer)
+        found = await gather_dict(dicts)
+        return await self._nodes_found(found)
 
     async def _nodes_found(self, responses):
         raise NotImplementedError
@@ -27,8 +71,6 @@ class SpiderCrawl:
 class ValueSpiderCrawl(SpiderCrawl):
     def __init__(self, protocol, node, peers, ksize, alpha):
         SpiderCrawl.__init__(self, protocol, node, peers, ksize, alpha)
-        # keep track of the single nearest node without value - per
-        # section 2.3 so we can set the key there if found
         self.nearest_without_value = NodeHeap(self.node, 1)
 
     async def find(self):
@@ -46,13 +88,10 @@ class ValueSpiderCrawl(SpiderCrawl):
         for peerid, response in responses.items():
             response = RPCFindResponse(response)
             if not response.happened():
-                # print('no response')
                 toremove.append(peerid)
             elif response.has_value():
-                # print('value returned')
                 found_values.append(response.get_value())
             else:
-                # print('not re')
                 peer = self.nearest.get_node(peerid)
                 self.nearest_without_value.push(peer)
                 self.nearest.push(response.get_node_list())
@@ -61,7 +100,6 @@ class ValueSpiderCrawl(SpiderCrawl):
         if found_values:
             return await self._handle_found_values(found_values)
         if self.nearest.have_contacted_all():
-            # not found!
             return None
         return await self.find()
 
@@ -75,14 +113,6 @@ class ValueSpiderCrawl(SpiderCrawl):
         log.debug(f'!!!!!!!!! VALUES !!!!!!!!!!!! {values}')
         value = max(values, key=lambda x: x[0])
             
-        # value_counts = Counter(values)
-        # log.debug(f'!!!!!!!!! VALUE COUNTS !!!!!!!!!!!! {value_counts}')
-        # if len(value_counts) != 1:
-        #     log.warning("Got multiple values for key %i: %s",
-        #                 self.node.long_id, str(values))
-        # value = value_counts.most_common(1)[0][0]
-        # print(f'!!!!!! HANDLE FOUND VALUES: {value} !!!!!!')
-
         peer = self.nearest_without_value.popleft()
         if peer:
             await self.protocol.call_store(peer, self.node.id, value[1])
@@ -121,8 +151,8 @@ class RPCFindResponse:
 
         Args:
             response: This will be a tuple of (<response received>, <value>)
-                      where <value> will be a list of tuples if not found or
-                      a dictionary of {'value': v} where v is the value desired
+                    where <value> will be a list of tuples if not found or
+                    a dictionary of {'value': v} where v is the value desired
         """
         self.response = response
 
@@ -136,7 +166,6 @@ class RPCFindResponse:
         return isinstance(self.response[1], dict)
 
     def get_value(self):
-        # print(self.response)
         return self.response[1]['value']
 
     def get_node_list(self):
