@@ -600,3 +600,86 @@ class Agenda:
 
         print(f"You have successfull exited workspace {workspace_id}")
 
+    def check_availability(self, args):
+
+        if not self._already_logged():
+            print("There is no user logged")
+            return
+
+        workspace_id = args.workspace_id
+        date = args.date
+        start_time = args.start_time
+        end_time = args.end_time
+
+        workspace = self.get(workspace_id)
+
+        events = []
+
+        for event_id in workspace.events:
+            event = self.get(event_id)
+            if event.date == date:
+                if start_time and end_time:
+
+                    min_start_time, max_start_time, min_end_time = 0, 0, 0
+
+                    if start_time > event.start_time:
+
+                        min_start_time = event.start_time
+                        max_start_time = start_time
+                        min_end_time = event.end_time
+                    else:
+
+                        max_start_time = event.start_time
+                        min_start_time = start_time
+                        min_end_time = end_time
+
+                    if min_start_time <= max_start_time and min_end_time > max_start_time:
+                        events.append(event)
+                elif start_time and start_time <= event.end_time:
+
+                    events.append(event)
+                elif end_time and end_time <= events.start_time:
+
+                    events.append(event)
+
+        if len(events) > 0:
+            print("The following events collide with the given date and time:")
+            for e in events:
+                print(f"- {e}")
+        else:
+            print("The given date and time is available for any event")
+
+    def sudo(self, args):
+
+        action = args.action
+        n_s = args.n
+
+        if action == 'create':
+            if n_s:
+                self.api.create_servers(n_s)
+                print(f'{n_s} server(s) added')
+            else:
+                self.api.create_servers()
+                print(f'3 server(s) added')
+        else:
+            if not n_s:
+                self.api.remove_servers()
+            else:
+                print('This command removes a random number of servers')
+
+    def get(self, key):
+        data = self.api.get_value(key)[1]
+
+        if data == None or data is None:
+            return
+
+        try:
+            data = eval(eval(data)[1])
+        except:
+            data = eval(data)
+
+        return self.back.create(data)
+
+    def set(self, key, value):
+        self.api.set_value(key, value)
+        time.sleep(5)
