@@ -8,7 +8,7 @@ class CalendarEvent(ABC):
     """
 
     @abstractmethod
-    def __init__(self, from_user, title, date, place, start_time, end_time, workspace_id, id=None):
+    def __init__(self, from_user, title, date, place, start_time, end_time, group_id, id=None):
         """
         Inicializa un nuevo evento.
 
@@ -19,7 +19,7 @@ class CalendarEvent(ABC):
             place (str): El lugar del evento.
             start_time (time): La hora de inicio del evento.
             end_time (time): La hora de finalización del evento.
-            workspace_id (str): El ID del workspace al que pertenece el evento.
+            group_id (str): El ID del group al que pertenece el evento.
             id (str, optional): El ID único del evento. Si no se proporciona, se usa el título. Defaults to None.
         """
         pass
@@ -70,7 +70,7 @@ class Event(CalendarEvent):
             place (str): El lugar del evento.
             start_time (time): La hora de inicio del evento.
             end_time (time): La hora de finalización del evento.
-            workspace_id (str): El ID del workspace al que pertenece el evento.
+            group_id (str): El ID del group al que pertenece el evento.
             id (str, optional): El ID único del evento. Si no se proporciona, se usa el título. Defaults to None.
         """
         self.creator = creator

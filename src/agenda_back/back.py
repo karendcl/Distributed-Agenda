@@ -152,22 +152,22 @@ class Agenda:
 
         elif handle_request != None and req_id != None:
 
-            workspace = self.get(requests[req_id].workspace_id)
+            group = self.get(requests[req_id].group_id)
 
             if handle_request == 'accept':
-                new = user.accept_request(requests[req_id], workspace)
-                if requests[req_id].get_type() == 'workspace' and new:
-                    workspace = new
+                new = user.accept_request(requests[req_id], group)
+                if requests[req_id].get_type() == 'group' and new:
+                    group = new
                 print(f"Request successfully accepted.")
             else:
-                new = user.reject_request(requests[req_id], workspace)
+                new = user.reject_request(requests[req_id], group)
                 print(f"Request successfully rejected.")
 
             self.set(user.alias, user.dicc())
-            self.set(workspace.workspace_id, workspace.dicc())
+            self.set(group.group_id, group.dicc())
             self.set(req_id, requests[req_id].dicc())
 
-    def workspaces(self, args):
+    def groups(self, args):
 
         if not self._already_logged():
             print("There is no user logged")
@@ -175,19 +175,19 @@ class Agenda:
 
         user = self.get(self.logged_user)
 
-        if len(user.workspaces) > 0:
+        if len(user.groups) > 0:
 
-            workspaces = []
+            groups = []
 
-            for w in user.workspaces:
-                workspaces.append(self.get(w))
+            for w in user.groups:
+                groups.append(self.get(w))
 
-            print(f"Workspaces:")
-            for i, w in enumerate(workspaces):
+            print(f"groups:")
+            for i, w in enumerate(groups):
                 print(f"{i + 1}. {w}")
 
         else:
-            print("You do not belong to any workspace")
+            print("You do not belong to any group")
             return
 
     def user_profile(self, args):
@@ -231,7 +231,7 @@ class Agenda:
              'password': new_password or user.password,
              'logged': user.active,
              'inbox': user.requests,
-             'workspaces': user.workspaces}
+             'groups': user.groups}
         )
 
         self.set(new_user.alias, new_user.dicc())
@@ -240,7 +240,7 @@ class Agenda:
 
         print(f'Profile edited.')
 
-    def create_workspace(self, args):
+    def create_group(self, args):
 
         if not self._already_logged():
             print("There is no user logged")
@@ -257,11 +257,11 @@ class Agenda:
 
         user = self.get(self.logged_user)
 
-        new_workspace = user.create_workspace(title, type, id)
+        new_group = user.create_group(title, type, id)
         self.set(user.alias, user.dicc())
-        self.set(new_workspace.workspace_id, new_workspace.dicc())
+        self.set(new_group.group_id, new_group.dicc())
 
-        print(f"Workspace {new_workspace.workspace_id} was created.")
+        print(f"group {new_group.group_id} was created.")
 
     def add_user(self, args):
 
@@ -269,29 +269,29 @@ class Agenda:
             print("There is no user logged")
             return
 
-        workspace_id = args.workspace_id
+        group_id = args.group_id
         user_alias = args.user_alias
 
         user = self.get(self.logged_user)
         user_to_add = self.get(user_alias)
-        workspace = self.get(workspace_id)
+        group = self.get(group_id)
 
         if user_to_add == None:
             print(f"User {user_alias} is not register into the app")
             return
-        if workspace == None or workspace_id not in user.workspaces:
+        if group == None or group_id not in user.groups:
             print(
-                f"User {user.alias} does not belong to workspace {workspace_id}")
+                f"User {user.alias} does not belong to group {group_id}")
             return
 
-        request = workspace.add_user(user.alias, user_to_add)
+        request = group.add_user(user.alias, user_to_add)
 
         if request:
             self.set(request.request_id, request.dicc())
 
         self.set(user.alias, user.dicc())
         self.set(user_to_add.alias, user_to_add.dicc())
-        self.set(workspace_id, workspace.dicc())
+        self.set(group_id, group.dicc())
 
     def remove_user(self, args):
 
@@ -299,27 +299,27 @@ class Agenda:
             print("There is no user logged")
             return
 
-        workspace_id = args.workspace_id
+        group_id = args.group_id
         user_alias = args.user_alias
 
         user = self.get(self.logged_user)
         user_to_remove = self.get(user_alias)
-        workspace = self.get(workspace_id)
+        group = self.get(group_id)
 
         if user_to_remove == None:
             print(f"User {user_alias} is not register into the app")
             return
-        if workspace == None or workspace_id not in user.workspaces:
+        if group == None or group_id not in user.groups:
             print(
-                f"User {user.alias} does not belong to workspace {workspace_id}")
+                f"User {user.alias} does not belong to group {group_id}")
             return
 
-        remove = workspace.remove_user(user.alias, user_to_remove)
+        remove = group.remove_user(user.alias, user_to_remove)
 
         if remove:
             self.set(user.alias, user.dicc())
             self.set(user_to_remove.alias, user_to_remove.dicc())
-            self.set(workspace_id, workspace.dicc())
+            self.set(group_id, group.dicc())
 
     def get_user(self, args):
 
@@ -327,18 +327,18 @@ class Agenda:
             print("There is no user logged")
             return
 
-        workspace_id = args.workspace_id
+        group_id = args.group_id
 
         user = self.get(self.logged_user)
 
-        if workspace_id in user.workspaces:
-            workspace = self.get(workspace_id)
-            print(f"Users of workspace {workspace_id}:")
-            for u in workspace.users:
+        if group_id in user.groups:
+            group = self.get(group_id)
+            print(f"Users of group {group_id}:")
+            for u in group.users:
                 print(f"- {u}")
             return
 
-        print(f"User {user.alias} does not belong to workspace {workspace_id}")
+        print(f"User {user.alias} does not belong to group {group_id}")
 
     def change_role(self, args):
 
@@ -347,27 +347,27 @@ class Agenda:
             return
 
         user_alias = args.user_alias
-        workspace_id = args.workspace_id
+        group_id = args.group_id
 
         user = self.get(self.logged_user)
 
-        if workspace_id not in user.workspaces:
+        if group_id not in user.groups:
             print(
-                f"User {user.alias} does not belong to workspace {workspace_id}")
+                f"User {user.alias} does not belong to group {group_id}")
             return
 
         user_to_change = self.get(user_alias)
-        workspace = self.get(workspace_id)
+        group = self.get(group_id)
 
-        if workspace.get_type() == 'flat':
-            print(f"Workspace {workspace_id} does not have roles")
+        if group.get_type() == 'flat':
+            print(f"group {group_id} does not have roles")
             return
 
-        workspace.change_role(user.alias, user_alias)
+        group.change_role(user.alias, user_alias)
 
         self.set(user.alias, user.dicc())
         self.set(user_to_change.alias, user_to_change.dicc())
-        self.set(workspace.workspace_id, workspace.dicc())
+        self.set(group.group_id, group.dicc())
 
     def create_event(self, args):
 
@@ -375,7 +375,7 @@ class Agenda:
             print("There is no user logged")
             return
 
-        workspace_id = args.workspace_id
+        group_id = args.group_id
         title = args.title
         date = args.date
         place = args.place
@@ -385,23 +385,23 @@ class Agenda:
 
         user_get = self.get(self.logged_user)
 
-        if workspace_id not in user_get.workspaces:
-            print(f"User {user_get.alias} does not belong to workspace {workspace_id}")
+        if group_id not in user_get.groups:
+            print(f"User {user_get.alias} does not belong to group {group_id}")
             return
 
-        workspace_get = self.get(workspace_id)
+        group_get = self.get(group_id)
         users = []
 
-        for u in workspace_get.users:
+        for u in group_get.users:
             users.append(self.get(u))
 
         users_collision = set()
         you = False
 
         for user in users:
-            for workspace_id in user.workspaces:
-                workspace = self.get(workspace_id)
-                for event_id in workspace.events:
+            for group_id in user.groups:
+                group = self.get(group_id)
+                for event_id in group.events:
 
                     event = self.get(event_id)
                     min_start_time, max_start_time, min_end_time = 0, 0, 0
@@ -435,7 +435,7 @@ class Agenda:
                 if confirmation.lower() == 'n':
                     return
 
-        event, request = user_get.create_event(workspace_get, title, date, place, start_time, end_time, users, id_event)
+        event, request = user_get.create_event(group_get, title, date, place, start_time, end_time, users, id_event)
 
         if event != None:
             self.set(event.event_id, event.dicc())
@@ -448,7 +448,7 @@ class Agenda:
         for u in users:
             self.set(u.alias, u.dicc())
 
-        self.set(workspace_get.workspace_id, workspace_get.dicc())
+        self.set(group_get.group_id, group_get.dicc())
 
     def remove_event(self, args):
 
@@ -460,12 +460,12 @@ class Agenda:
 
         user = self.get(self.logged_user)
         event = self.get(event_id)
-        workspace = self.get(event.workspace_id)
+        group = self.get(event.group_id)
 
-        user.remove_event(workspace, event)
+        user.remove_event(group, event)
 
         self.set(user.alias, user.dicc())
-        self.set(workspace.workspace_id, workspace.dicc())
+        self.set(group.group_id, group.dicc())
 
     def events(self, args):
 
@@ -473,23 +473,23 @@ class Agenda:
             print("There is no user logged")
             return
 
-        workspace_id = args.workspace_id
+        group_id = args.group_id
 
         user = self.get(self.logged_user)
 
-        if workspace_id not in user.workspaces:
+        if group_id not in user.groups:
             print(
-                f"User {user.alias} does not belong to workspace {workspace_id}")
+                f"User {user.alias} does not belong to group {group_id}")
             return
 
-        workspace = self.get(workspace_id)
+        group = self.get(group_id)
 
-        if len(workspace.events) > 0:
-            print(f"Events of workspace {workspace_id}:")
-            for i, e in enumerate(workspace.events):
+        if len(group.events) > 0:
+            print(f"Events of group {group_id}:")
+            for i, e in enumerate(group.events):
                 print(f"{i + 1}. {self.get(e)}")
         else:
-            print(f"Workspace {workspace_id} does not have any events")
+            print(f"group {group_id} does not have any events")
             return
 
     def set_event(self, args):
@@ -509,11 +509,11 @@ class Agenda:
 
         event = self.get(event_id)
 
-        workspace = self.get(event.workspace_id)
+        group = self.get(event.group_id)
 
         new_event = user.set_event(
             event=event,
-            workspace=workspace,
+            group=group,
             title=title,
             date=date,
             place=place,
@@ -525,39 +525,39 @@ class Agenda:
             self.set(new_event.event_id, new_event.dicc())
             print("Event successfully modified")
 
-    def change_workspace_type(self, args):
+    def change_group_type(self, args):
 
         if not self._already_logged():
             print("There is no user logged")
             return
 
-        workspace_id = args.workspace_id
+        group_id = args.group_id
         admins = args.admins
 
-        workspace = self.get(workspace_id)
+        group = self.get(group_id)
 
-        if workspace == None:
-            print(f"Workspace {workspace_id} does not exist")
+        if group == None:
+            print(f"group {group_id} does not exist")
             return
 
         user = self.get(self.logged_user)
 
         users = []
 
-        for u in workspace.users:
+        for u in group.users:
             users.append(self.get(u))
 
-        request, new_workspace = user.change_workspace_type(
-            workspace, admins, users)
+        request, new_group = user.change_group_type(
+            group, admins, users)
 
         if request != None:
             self.set(request.request_id, request.dicc())
-            print(f"Request to change type of workspace {workspace_id} sent")
-        if new_workspace != None:
-            self.set(new_workspace.workspace_id, new_workspace.dicc())
-            print(f"Type of workspace {workspace_id} was changed successfully")
+            print(f"Request to change type of group {group_id} sent")
+        if new_group != None:
+            self.set(new_group.group_id, new_group.dicc())
+            print(f"Type of group {group_id} was changed successfully")
         else:
-            self.set(workspace.workspace_id, workspace.dicc())
+            self.set(group.group_id, group.dicc())
 
         for u in users:
             self.set(u.alias, u.dicc())
@@ -568,37 +568,37 @@ class Agenda:
             print("There is no user logged")
             return
 
-        workspace_id = args.workspace_id
+        group_id = args.group_id
 
-        workspace = self.get(workspace_id)
+        group = self.get(group_id)
 
-        if self.logged_user not in workspace.users:
-            print(f"You do not belong to workspace {workspace_id}")
+        if self.logged_user not in group.users:
+            print(f"You do not belong to group {group_id}")
             return
 
-        print(f"Request from workspace {workspace_id}:")
+        print(f"Request from group {group_id}:")
 
-        for r in workspace.requests:
+        for r in group.requests:
             request = self.get(r)
             print(f"{request} - {request.status}")
 
-    def exit_workspace(self, args):
+    def exit_group(self, args):
 
         if not self._already_logged():
             print("There is no user logged")
             return
 
-        workspace_id = args.workspace_id
+        group_id = args.group_id
 
         user = self.get(self.logged_user)
-        workspace = self.get(workspace_id)
+        group = self.get(group_id)
 
-        user.exit_workspace(workspace)
+        user.exit_group(group)
 
         self.set(user.alias, user.dicc())
-        self.set(workspace.workspace_id, workspace.dicc())
+        self.set(group.group_id, group.dicc())
 
-        print(f"You have successfull exited workspace {workspace_id}")
+        print(f"You have successfull exited group {group_id}")
 
     def check_availability(self, args):
 
@@ -606,16 +606,16 @@ class Agenda:
             print("There is no user logged")
             return
 
-        workspace_id = args.workspace_id
+        group_id = args.group_id
         date = args.date
         start_time = args.start_time
         end_time = args.end_time
 
-        workspace = self.get(workspace_id)
+        group = self.get(group_id)
 
         events = []
 
-        for event_id in workspace.events:
+        for event_id in group.events:
             event = self.get(event_id)
             if event.date == date:
                 if start_time and end_time:
@@ -683,3 +683,4 @@ class Agenda:
     def set(self, key, value):
         self.api.set_value(key, value)
         time.sleep(5)
+        
