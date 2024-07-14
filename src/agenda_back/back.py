@@ -125,6 +125,23 @@ class Agenda:
         print(ans)
         return ans
 
+    def create_group(self, name, users, hierarchical):
+
+        if hierarchical:
+            type = 'hierarchical'
+        else:
+            type = 'independent'
+
+        user = self.get(self.logged_user)
+
+        new_group = user.create_group(name, type, name)
+        self.set(user.alias, user.dicc())
+        self.set(new_group.group_id, new_group.dicc())
+
+        for us in users:
+            user_ = self.get(us)
+            user_.add_to_group(name)
+
     # NOT DONE ------------------------
     def logout(self, args):
 
@@ -189,21 +206,7 @@ class Agenda:
 
 
 
-    def create_group(self, name, users, hierarchical):
 
-        if hierarchical:
-            type = 'hierarchical'
-        else:
-            type = 'independent'
-
-        user = self.get(self.logged_user)
-
-        new_group = user.create_group(name, type)
-        self.set(user.alias, user.dicc())
-        self.set(new_group.group_id, new_group.dicc())
-
-        for us in users:
-            self.add_user_to_group(new_group.group_id, us)
 
         # pending
 
