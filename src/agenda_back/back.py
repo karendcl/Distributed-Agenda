@@ -138,9 +138,10 @@ class Agenda:
         self.set(user.alias, user.dicc())
         self.set(new_group.group_id, new_group.dicc())
 
-        for us in users:
-            user_ = self.get(us)
-            user_.add_to_group(name)
+        if users:
+            for us in users:
+                user_ = self.get(us)
+                user_.add_to_group(name)
 
     # NOT DONE ------------------------
     def logout(self, args):

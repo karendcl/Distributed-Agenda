@@ -24,21 +24,12 @@ class AgendaItem:
         self.id = id
 
 def create_group(group_name, selected_users, hierarchical, username):
-    path = '../data/groups.json'
     try:
-        with open(path, 'r') as f:
-            groups = json.load(f)
-    except FileNotFoundError:
-        groups = {}
-
-    if group_name in groups:
+        selected_users = [] if not selected_users else selected_users
+        back.create_group(group_name,selected_users,hierarchical)
+        return True
+    except:
         return False
-
-    selected_users += [username]
-    groups[group_name] = {'users': selected_users, 'hierarchical': hierarchical, 'admin': username}
-    with open(path, 'w') as f:
-        json.dump(groups, f)
-    return True
 
 def get_groups_of_user(username):
     return back.group_of_user()
