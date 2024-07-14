@@ -109,6 +109,7 @@ class Agenda:
             for u in group.users:
                 ans.append(u)
 
+        print(ans)
         return ans
 
     def groups_of_user(self):
@@ -121,6 +122,7 @@ class Agenda:
             for w in user.groups:
                 ans.append(self.get(w))
 
+        print(ans)
         return ans
 
     # NOT DONE ------------------------
@@ -403,42 +405,42 @@ class Agenda:
             self.set(new_event.event_id, new_event.dicc())
             print("Event successfully modified")
 
-    def change_group_type(self, args):
-
-        if not self._already_logged():
-            print("There is no user logged")
-            return
-
-        group_id = args.group_id
-        admins = args.admins
-
-        group = self.get(group_id)
-
-        if group == None:
-            print(f"group {group_id} does not exist")
-            return
-
-        user = self.get(self.logged_user)
-
-        users = []
-
-        for u in group.users:
-            users.append(self.get(u))
-
-        request, new_group = user.change_group_type(
-            group, admins, users)
-
-        if request != None:
-            self.set(request.request_id, request.dicc())
-            print(f"Request to change type of group {group_id} sent")
-        if new_group != None:
-            self.set(new_group.group_id, new_group.dicc())
-            print(f"Type of group {group_id} was changed successfully")
-        else:
-            self.set(group.group_id, group.dicc())
-
-        for u in users:
-            self.set(u.alias, u.dicc())
+    # def change_group_type(self, args):
+    #
+    #     if not self._already_logged():
+    #         print("There is no user logged")
+    #         return
+    #
+    #     group_id = args.group_id
+    #     admins = args.admins
+    #
+    #     group = self.get(group_id)
+    #
+    #     if group == None:
+    #         print(f"group {group_id} does not exist")
+    #         return
+    #
+    #     user = self.get(self.logged_user)
+    #
+    #     users = []
+    #
+    #     for u in group.users:
+    #         users.append(self.get(u))
+    #
+    #     request, new_group = user.change_group_type(
+    #         group, admins, users)
+    #
+    #     if request != None:
+    #         self.set(request.request_id, request.dicc())
+    #         print(f"Request to change type of group {group_id} sent")
+    #     if new_group != None:
+    #         self.set(new_group.group_id, new_group.dicc())
+    #         print(f"Type of group {group_id} was changed successfully")
+    #     else:
+    #         self.set(group.group_id, group.dicc())
+    #
+    #     for u in users:
+    #         self.set(u.alias, u.dicc())
 
     def request_status(self, args):
 
@@ -460,23 +462,23 @@ class Agenda:
             request = self.get(r)
             print(f"{request} - {request.status}")
 
-    def exit_group(self, args):
-
-        if not self._already_logged():
-            print("There is no user logged")
-            return
-
-        group_id = args.group_id
-
-        user = self.get(self.logged_user)
-        group = self.get(group_id)
-
-        user.exit_group(group)
-
-        self.set(user.alias, user.dicc())
-        self.set(group.group_id, group.dicc())
-
-        print(f"You have successfull exited group {group_id}")
+    # def exit_group(self, args):
+    #
+    #     if not self._already_logged():
+    #         print("There is no user logged")
+    #         return
+    #
+    #     group_id = args.group_id
+    #
+    #     user = self.get(self.logged_user)
+    #     group = self.get(group_id)
+    #
+    #     user.exit_group(group)
+    #
+    #     self.set(user.alias, user.dicc())
+    #     self.set(group.group_id, group.dicc())
+    #
+    #     print(f"You have successfull exited group {group_id}")
 
     def check_availability(self, args):
 

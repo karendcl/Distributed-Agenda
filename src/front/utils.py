@@ -8,7 +8,11 @@ import os
 # Add the parent directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import agenda_back.back as back
+import agenda_back.back as back_
+from api_and_controllers.api import *
+
+api = API()
+back = back_.Agenda(api)
 
 class AgendaItem:
     def __init__(self, name, description, time, time_end, date = datetime.datetime.today(), id = 0):
@@ -38,14 +42,6 @@ def create_group(group_name, selected_users, hierarchical, username):
 
 def get_groups_of_user(username):
     return back.group_of_user()
-
-
-def get_Selected_users(list_widget):
-    selected_users = []
-    for i in range(list_widget.count()):
-        if list_widget.item(i).checkState():
-            selected_users.append(list_widget.item(i).text())
-    return selected_users
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
@@ -140,29 +136,6 @@ def decline_meeting(username, id):
     meeting = remove_meeting(path, id)
     return False if not meeting else True
 
-def times_clash(start1, end1, start2, end2, date1, date2):
-    return start1 <= end2 and start2 <= end1 and date1 == date2
-
-def identify_conflicts(accepted_meetings: list[AgendaItem], pending_meetings: list[AgendaItem] = None) -> list[int]:
-    conflicts = []
-    if pending_meetings:
-        for i in range(len(accepted_meetings)):
-            for j in range(len(pending_meetings)):
-                if times_clash(accepted_meetings[i].time_start, accepted_meetings[i].time_end, pending_meetings[j].time_start,
-                               pending_meetings[j].time_end, accepted_meetings[i].date, pending_meetings[j].date):
-                    conflicts.append(accepted_meetings[i].id)
-                    conflicts.append(pending_meetings[j].id)
-    else:
-        for i in range(len(accepted_meetings)):
-            for j in range(i+1, len(accepted_meetings)):
-                if times_clash(accepted_meetings[i].time_start, accepted_meetings[i].time_end, accepted_meetings[j].time_start,
-                               accepted_meetings[j].time_end, accepted_meetings[i].date, accepted_meetings[j].date):
-                    conflicts.append(accepted_meetings[i].id)
-                    conflicts.append(accepted_meetings[j].id)
-
-    return conflicts
-
-
 def get_all_users(username):
     path = '../data/users.json'
     try:
@@ -186,5 +159,35 @@ def get_all_groups():
 
 
 
+
+
+def get_Selected_users(list_widget):
+    selected_users = []
+    for i in range(list_widget.count()):
+        if list_widget.item(i).checkState():
+            selected_users.append(list_widget.item(i).text())
+    return selected_users
+
+def identify_conflicts(accepted_meetings: list[AgendaItem], pending_meetings: list[AgendaItem] = None) -> list[int]:
+    conflicts = []
+    if pending_meetings:
+        for i in range(len(accepted_meetings)):
+            for j in range(len(pending_meetings)):
+                if times_clash(accepted_meetings[i].time_start, accepted_meetings[i].time_end, pending_meetings[j].time_start,
+                               pending_meetings[j].time_end, accepted_meetings[i].date, pending_meetings[j].date):
+                    conflicts.append(accepted_meetings[i].id)
+                    conflicts.append(pending_meetings[j].id)
+    else:
+        for i in range(len(accepted_meetings)):
+            for j in range(i+1, len(accepted_meetings)):
+                if times_clash(accepted_meetings[i].time_start, accepted_meetings[i].time_end, accepted_meetings[j].time_start,
+                               accepted_meetings[j].time_end, accepted_meetings[i].date, accepted_meetings[j].date):
+                    conflicts.append(accepted_meetings[i].id)
+                    conflicts.append(accepted_meetings[j].id)
+
+    return conflicts
+
+def times_clash(start1, end1, start2, end2, date1, date2):
+    return start1 <= end2 and start2 <= end1 and date1 == date2
 
 
