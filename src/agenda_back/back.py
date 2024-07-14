@@ -40,6 +40,24 @@ class Agenda:
     def _already_logged(self):
         return self.logged_user is not None
 
+    def get(self, key):
+        data = self.api.get_value(key)[1]
+
+        if data == None or data is None:
+            return
+
+        try:
+            data = eval(eval(data)[1])
+        except:
+            data = eval(data)
+
+        return self.back.create(data)
+
+    def set(self, key, value):
+        self.api.set_value(key, value)
+        time.sleep(5)
+
+
     def login(self, username, password):
 
         user = self.get(username)
@@ -78,7 +96,48 @@ class Agenda:
         return True
 
 
+    def add_user_to_group(self, group_id, user_alias):
+        user = self.get(self.logged_user)
+        user_to_add = self.get(user_alias)
+        group = self.get(group_id)
 
+        request = group.add_user(user.alias, user_to_add)
+
+        if request:
+            self.set(request.request_id, request.dicc())
+
+        self.set(user.alias, user.dicc())
+        self.set(user_to_add.alias, user_to_add.dicc())
+        self.set(group_id, group.dicc())
+
+    def get_users_from_group(self, group_name, user):
+
+        if not self._already_logged():
+            return []
+
+        user = self.get(self.logged_user)
+
+        ans = []
+        if group_name in user.groups:
+            group = self.get(group_name)
+            for u in group.users:
+                ans.append(u)
+
+        return ans
+
+    def groups_of_user(self):
+
+        user = self.get(self.logged_user)
+
+        ans = []
+
+        if len(user.groups) > 0:
+            for w in user.groups:
+                ans.append(self.get(w))
+
+        return ans
+
+    # NOT DONE ------------------------
     def logout(self, args):
 
         if not self._already_logged():
@@ -139,178 +198,27 @@ class Agenda:
             self.set(group.group_id, group.dicc())
             self.set(req_id, requests[req_id].dicc())
 
-    def groups(self, args):
 
-        if not self._already_logged():
-            print("There is no user logged")
-            return
 
-        user = self.get(self.logged_user)
 
-        if len(user.groups) > 0:
+    def create_group(self, name, users, hierarchical):
 
-            groups = []
-
-            for w in user.groups:
-                groups.append(self.get(w))
-
-            print(f"groups:")
-            for i, w in enumerate(groups):
-                print(f"{i + 1}. {w}")
-
-        else:
-            print("You do not belong to any group")
-            return
-
-    def user_profile(self, args):
-
-        if not self._already_logged():
-            print("There is no user logged")
-            return
-
-        name = args.name
-        change_password = args.change_password
-
-        user = self.get(self.logged_user)
-
-        if name == None and not change_password:
-            print(f'Profile:\n Alias: {user.alias}\n Name: {user.full_name}')
-            return
-
-        new_password = None
-        if change_password:
-            while True:
-                confirmation = getpass.getpass(
-                    "Please type your current password:")
-                if digest(confirmation) != user.password:
-                    print("Incorrect password")
-                else:
-                    while True:
-                        new_password = digest(
-                            getpass.getpass("Type the new password:"))
-                        new_password_confirmation = digest(
-                            getpass.getpass("New password confirmation:"))
-                        if new_password_confirmation == new_password:
-                            break
-                        else:
-                            print('Incorrect password')
-                    break
-
-        new_user = self.back.create(
-            {'class': 'user',
-             'alias': user.alias,
-             'full_name': name or user.full_name,
-             'password': new_password or user.password,
-             'logged': user.active,
-             'inbox': user.requests,
-             'groups': user.groups}
-        )
-
-        self.set(new_user.alias, new_user.dicc())
-
-        self.logged_user = new_user.alias
-
-        print(f'Profile edited.')
-
-    def create_group(self, args):
-
-        if not self._already_logged():
-            print("There is no user logged")
-            return
-
-        title = args.title
-        type = args.type
-        id = args.id
-
-        if type == 'f':
-            type = 'flat'
-        else:
+        if hierarchical:
             type = 'hierarchical'
+        else:
+            type = 'independent'
 
         user = self.get(self.logged_user)
 
-        new_group = user.create_group(title, type, id)
+        new_group = user.create_group(name, type)
         self.set(user.alias, user.dicc())
         self.set(new_group.group_id, new_group.dicc())
 
-        print(f"group {new_group.group_id} was created.")
+        for us in users:
+            self.add_user_to_group(new_group.group_id, us)
 
-    def add_user(self, args):
 
-        if not self._already_logged():
-            print("There is no user logged")
-            return
 
-        group_id = args.group_id
-        user_alias = args.user_alias
-
-        user = self.get(self.logged_user)
-        user_to_add = self.get(user_alias)
-        group = self.get(group_id)
-
-        if user_to_add == None:
-            print(f"User {user_alias} is not register into the app")
-            return
-        if group == None or group_id not in user.groups:
-            print(
-                f"User {user.alias} does not belong to group {group_id}")
-            return
-
-        request = group.add_user(user.alias, user_to_add)
-
-        if request:
-            self.set(request.request_id, request.dicc())
-
-        self.set(user.alias, user.dicc())
-        self.set(user_to_add.alias, user_to_add.dicc())
-        self.set(group_id, group.dicc())
-
-    def remove_user(self, args):
-
-        if not self._already_logged():
-            print("There is no user logged")
-            return
-
-        group_id = args.group_id
-        user_alias = args.user_alias
-
-        user = self.get(self.logged_user)
-        user_to_remove = self.get(user_alias)
-        group = self.get(group_id)
-
-        if user_to_remove == None:
-            print(f"User {user_alias} is not register into the app")
-            return
-        if group == None or group_id not in user.groups:
-            print(
-                f"User {user.alias} does not belong to group {group_id}")
-            return
-
-        remove = group.remove_user(user.alias, user_to_remove)
-
-        if remove:
-            self.set(user.alias, user.dicc())
-            self.set(user_to_remove.alias, user_to_remove.dicc())
-            self.set(group_id, group.dicc())
-
-    def get_user(self, args):
-
-        if not self._already_logged():
-            print("There is no user logged")
-            return
-
-        group_id = args.group_id
-
-        user = self.get(self.logged_user)
-
-        if group_id in user.groups:
-            group = self.get(group_id)
-            print(f"Users of group {group_id}:")
-            for u in group.users:
-                print(f"- {u}")
-            return
-
-        print(f"User {user.alias} does not belong to group {group_id}")
 
     def change_role(self, args):
 
@@ -621,10 +529,9 @@ class Agenda:
         else:
             print("The given date and time is available for any event")
 
-    def sudo(self, args):
 
-        action = args.action
-        n_s = args.n
+    # PENDING
+    def sudo(self, action, n_s):
 
         if action == 'create':
             if n_s:
@@ -639,20 +546,5 @@ class Agenda:
             else:
                 print('This command removes a random number of servers')
 
-    def get(self, key):
-        data = self.api.get_value(key)[1]
 
-        if data == None or data is None:
-            return
-
-        try:
-            data = eval(eval(data)[1])
-        except:
-            data = eval(data)
-
-        return self.back.create(data)
-
-    def set(self, key, value):
-        self.api.set_value(key, value)
-        time.sleep(5)
         
