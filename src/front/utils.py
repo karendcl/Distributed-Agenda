@@ -2,6 +2,13 @@ import datetime
 import random
 import json
 import hashlib
+import sys
+import os
+
+# Add the parent directory to the Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+import agenda_back.back as back
 
 class AgendaItem:
     def __init__(self, name, description, time, time_end, date = datetime.datetime.today(), id = 0):
@@ -51,30 +58,11 @@ def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
 def login(username, password):
-    path = '../data/users.json'
-    try:
-        with open(path, 'r') as f:
-            users = json.load(f)
-    except FileNotFoundError:
-        return False
-    if username in users and users[username] == hash_password(password):
-        return True
-    return False
+    return back.login(username,password)
 
 def signup(username, password):
-    path = '../data/users.json'
-    try:
-        with open(path, 'r') as f:
-            users = json.load(f)
-    except FileNotFoundError:
-        users = {}
-
-    if username in users:
-        return False
-    users[username] = hash_password(password)
-    with open(path, 'w') as f:
-        json.dump(users, f)
-    return True
+    pass_ = hash_password(password)
+    return back.register(username,pass_)
 
 def get_meeting(username,path):
     try:
@@ -201,3 +189,9 @@ def get_all_groups():
     return groups.keys()
 
 # todo once a leader accepts it, all group participants get it
+
+
+
+
+
+

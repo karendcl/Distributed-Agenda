@@ -1,9 +1,12 @@
 import sys
+import os
 
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from utils import *
+
+
 
 class QLineEdit(QLineEdit):
     def __init__(self, parent = None):
@@ -216,7 +219,7 @@ class MainWindow(QMainWindow):
             msg.setWindowTitle("Success")
             msg.setText("Sign up successful")
             msg.exec_()
-            self.on_login_click()
+            self.my_account(username)
         else:
             msg = QMessageBox()
             msg.setWindowTitle("Error")

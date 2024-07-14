@@ -38,63 +38,34 @@ class Agenda:
         self.api = api
 
     def _already_logged(self):
-        return self.logged_user != None
+        return self.logged_user is not None
 
-    def login(self, args):
+    def login(self, username, password):
 
-        if self._already_logged():
-            print(f"There is a user logged already.")
-            return
+        user = self.get(username)
 
-        alias = args.alias
-        password = digest(args.password)
-
-        user = self.get(alias)
-
-        # if user not in DB, register
-        if user == None:
-            print('You are not register into the app.')
-            return
+        if user is None or user == None:
+            return False
 
         # if alias and password match with user's, logged
-        if user.alias == alias and user.password == password:
+        if user.alias == username and user.password == password:
             user.logged()
             self.set(user.alias, user.dicc())
             self.logged_user = user.alias
+            return True
 
-            print(f"Welcome to Monica Scheduler {user.alias}!")
+        return False
 
-        else:
-            print(f"Incorrect username or password. Try again.")
+    def register(self, username, password):
 
-        return
+        user = self.get(username)
 
-    def register(self, args):
+        if user != None or user is not None:
+            return False
 
-        if self._already_logged():
-            print(f"There is a user logged. You cannot register.")
-            return
-
-        alias = args.alias
-        full_name = args.full_name
-        password = digest(args.password)
-        confirmation = digest(args.confirmation)
-
-        # Password and confirmation not matching
-        if password != confirmation:
-            print("Wrong password.")
-            return
-
-        user = self.get(alias)
-
-        if user != None:
-            print(f"User with alias {alias} already exists")
-            return
-
-        new_user = self.factory.create({
+        new_user = self.back.create({
             'class': 'user',
-            'alias': alias,
-            'full_name': full_name,
+            'alias': username,
             'password': password}
         )
 
@@ -104,8 +75,9 @@ class Agenda:
 
         self.set(new_user.alias, new_user.dicc())
 
-        print("Successfully registered")
-        print(f"Welcome to Monica Scheduler {new_user.alias}!")
+        return True
+
+
 
     def logout(self, args):
 
@@ -224,7 +196,7 @@ class Agenda:
                             print('Incorrect password')
                     break
 
-        new_user = self.factory.create(
+        new_user = self.back.create(
             {'class': 'user',
              'alias': user.alias,
              'full_name': name or user.full_name,
