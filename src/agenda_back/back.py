@@ -96,20 +96,6 @@ class Agenda:
         return True
 
 
-    def add_user_to_group(self, group_id, user_alias):
-        user = self.get(self.logged_user)
-        user_to_add = self.get(user_alias)
-        group = self.get(group_id)
-
-        request = group.add_user(user.alias, user_to_add)
-
-        if request:
-            self.set(request.request_id, request.dicc())
-
-        self.set(user.alias, user.dicc())
-        self.set(user_to_add.alias, user_to_add.dicc())
-        self.set(group_id, group.dicc())
-
     def get_users_from_group(self, group_name, user):
 
         if not self._already_logged():
@@ -217,9 +203,21 @@ class Agenda:
         for us in users:
             self.add_user_to_group(new_group.group_id, us)
 
+        # pending
 
+    def add_user_to_group(self, group_id, user_alias):
+        user = self.get(self.logged_user)
+        user_to_add = self.get(user_alias)
+        group = self.get(group_id)
 
+        request = group.add_user(user.alias, user_to_add)
 
+        if request:
+            self.set(request.request_id, request.dicc())
+
+        self.set(user.alias, user.dicc())
+        self.set(user_to_add.alias, user_to_add.dicc())
+        self.set(group_id, group.dicc())
     def change_role(self, args):
 
         if not self._already_logged():

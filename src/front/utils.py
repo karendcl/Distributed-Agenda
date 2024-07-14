@@ -37,14 +37,7 @@ def create_group(group_name, selected_users, hierarchical, username):
     return True
 
 def get_groups_of_user(username):
-    path = '../data/groups.json'
-    try:
-        with open(path, 'r') as f:
-            groups : dict = json.load(f)
-    except FileNotFoundError:
-        return []
-
-    return [key for key,value in groups.items() if username in value['users']]
+    return back.group_of_user()
 
 
 def get_Selected_users(list_widget):
