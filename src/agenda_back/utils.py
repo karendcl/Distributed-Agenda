@@ -38,18 +38,18 @@ class Back:
 
     def _create_event(self, object):
 
-        date = parse_date(object['date'])
-        start_time = parse_time(object['start_time'])
-        end_time = parse_time(object['end_time'])
+        title = object['title']
+        description = object['description']
+        date = object['date']
+        start_time = object['start_time']
+        end_time = object['end_time']
+        participants = object['participants']
+        groups = object['groups']
 
-        return Event(object['from_user'],
-                     object['title'],
-                     date,
-                     object['place'],
-                     start_time,
-                     end_time,
-                     object['group'],
-                     object['id'])
+        event = Event(title, description, date, start_time, end_time, participants, groups)
+
+        return event
+
 
     def _create_user(self, object):
 

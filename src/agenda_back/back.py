@@ -152,17 +152,8 @@ class Agenda:
         return ans
 
     def groups_of_user(self):
-
         user = self.get(self.logged_user)
-
-        ans = []
-
-        if len(user.groups) > 0:
-            for w in user.groups:
-                ans.append(self.get(w))
-
-        print(ans)
-        return ans
+        return user.groups
 
     def create_group(self, name, users, hierarchical):
 
@@ -194,7 +185,55 @@ class Agenda:
         self.set(user.alias, user.dicc())
         self.logged_user = None
 
+    def create_pending_meeting(self, title, description, date, start_time, end_time, groups, participants):
+        event = self.back.create({
+            'class': 'event',
+            'title': title,
+            'description': description,
+            'date': date,
+            'start_time': start_time,
+            'end_time': end_time,
+            'participants': participants,
+            'groups': groups
+        })
+
+        self.set(event.event_id, event.dicc())
+
+        user = self.get(self.logged_user)
+        user.add_confirmed_event(event)
+        self.set(user.alias, user.dicc())
+
+        for p in participants:
+            user = self.get(p)
+            user.add_pending_event(event)
+            self.set(user.alias, user.dicc())
+
+        for g in groups:
+            group = self.get(g)
+            group.add_event(event)
+            self.set(group.group_id, group.dicc())
+
+
+    def get_pending_meetings(self):
+        user = self.get(self.logged_user)
+        ans = []
+        for e in user.pending_events:
+            event = self.get(e)
+            ans.append(event)
+        return ans
+
+    def get_confirmed_meetings(self):
+        user = self.get(self.logged_user)
+        ans = []
+        for e in user.confirmed_events:
+            event = self.get(e)
+            if event.confirmed:
+                ans.append(event)
+        return ans
+
     # NOT DONE ------------------------
+
+
 
 
     def inbox(self, args):
@@ -252,47 +291,47 @@ class Agenda:
 
         # pending
 
-    def add_user_to_group(self, group_id, user_alias):
-        user = self.get(self.logged_user)
-        user_to_add = self.get(user_alias)
-        group = self.get(group_id)
-
-        request = group.add_user(user.alias, user_to_add)
-
-        if request:
-            self.set(request.request_id, request.dicc())
-
-        self.set(user.alias, user.dicc())
-        self.set(user_to_add.alias, user_to_add.dicc())
-        self.set(group_id, group.dicc())
-    def change_role(self, args):
-
-        if not self._already_logged():
-            print("There is no user logged")
-            return
-
-        user_alias = args.user_alias
-        group_id = args.group_id
-
-        user = self.get(self.logged_user)
-
-        if group_id not in user.groups:
-            print(
-                f"User {user.alias} does not belong to group {group_id}")
-            return
-
-        user_to_change = self.get(user_alias)
-        group = self.get(group_id)
-
-        if group.get_type() == 'flat':
-            print(f"group {group_id} does not have roles")
-            return
-
-        group.change_role(user.alias, user_alias)
-
-        self.set(user.alias, user.dicc())
-        self.set(user_to_change.alias, user_to_change.dicc())
-        self.set(group.group_id, group.dicc())
+    # def add_user_to_group(self, group_id, user_alias):
+    #     user = self.get(self.logged_user)
+    #     user_to_add = self.get(user_alias)
+    #     group = self.get(group_id)
+    #
+    #     request = group.add_user(user.alias, user_to_add)
+    #
+    #     if request:
+    #         self.set(request.request_id, request.dicc())
+    #
+    #     self.set(user.alias, user.dicc())
+    #     self.set(user_to_add.alias, user_to_add.dicc())
+    #     self.set(group_id, group.dicc())
+    # def change_role(self, args):
+    #
+    #     if not self._already_logged():
+    #         print("There is no user logged")
+    #         return
+    #
+    #     user_alias = args.user_alias
+    #     group_id = args.group_id
+    #
+    #     user = self.get(self.logged_user)
+    #
+    #     if group_id not in user.groups:
+    #         print(
+    #             f"User {user.alias} does not belong to group {group_id}")
+    #         return
+    #
+    #     user_to_change = self.get(user_alias)
+    #     group = self.get(group_id)
+    #
+    #     if group.get_type() == 'flat':
+    #         print(f"group {group_id} does not have roles")
+    #         return
+    #
+    #     group.change_role(user.alias, user_alias)
+    #
+    #     self.set(user.alias, user.dicc())
+    #     self.set(user_to_change.alias, user_to_change.dicc())
+    #     self.set(group.group_id, group.dicc())
 
     def create_event(self, args):
 

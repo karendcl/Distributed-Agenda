@@ -19,9 +19,10 @@ class User:
         """
         self.alias = alias
         self.password = password
-        self.requests = []  # Lista de IDs de solicitudes recibidas
         self.groups = []  # Lista de IDs de grupos a los que pertenece el usuario
-        self.active = False  # Indica si el usuario está conectado 
+        self.active = False  # Indica si el usuario está conectado
+        self.confirmed_events = []  # Lista de IDs de eventos confirmados por el usuario
+        self.pending_events = []  # Lista de IDs de eventos pendientes de confirmación por el usuario
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, User):
@@ -34,25 +35,29 @@ class User:
         """
         self.active = True
 
-    def create_event(self, group: Group, title, date,place, start_time, end_time, users, id=None):
+    def create_event(self, event):
         """
-        Crea un nuevo evento en un grupo.
+        Crea un nuevo evento.
 
         Args:
-            group (Group): El grupo donde se creará el evento.
-            title (str): El título del evento.
-            date (date): La fecha del evento.
-            place (str): El lugar del evento.
-            start_time (time): La hora de inicio del evento.
-            end_time (time): La hora de finalización del evento.
-            users (list): Una lista de usuarios que serán invitados al evento.
-            id (str, optional): El ID único del evento. Si no se proporciona, se genera uno. Defaults to None.
+            event (Event): El evento a crear.
 
         Returns:
-            tuple: Una tupla que contiene el nuevo evento y la solicitud creada, si es necesario.
+            Event: El evento creado.
         """
-        new_event, new_request = group.add_event(self.alias,title,date,place,start_time,end_time, users, id)
-        return new_event, new_request
+        self.confirmed_events.append(event.event_id)
+        print(f"Event {event.title} created and added to user {self.alias} confirmed events")
+
+    def add_pending_event(self, event):
+        """
+        Agrega un evento pendiente de confirmación.
+
+        Args:
+            event (Event): El evento a agregar.
+        """
+        self.pending_events.append(event.event_id)
+        print(f"Event {event.title} added to user {self.alias} pending events")
+
     
     def create_group(self, group_name, group_type,id=None):
         """

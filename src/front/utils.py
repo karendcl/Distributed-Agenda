@@ -73,22 +73,22 @@ def get_meeting(username,path):
             or [g for g in meeting['groups'] if g in groups_admin] != []]
 
 def get_meetings(username):
-    path = '../data/meetings.json'
-    ans =  get_meeting(username,path)
-    ans.sort(key=lambda x: (x.date, x.time_start))
+    ans = back.get_confirmed_meetings()
+    ans.sort(key=lambda x: (x.date, x.start_time))
     return ans
 
 def get_pending_meetings(username):
-    path = '../data/pending_meetings.json'
-    ans =  get_meeting(username,path)
-    ans.sort(key=lambda x: (x.date, x.time_start))
+    ans = back.get_pending_meetings()
+    ans.sort(key=lambda x: (x.date, x.start_time))
     return ans
 
 def create_meeting(name, description, time,endtime, date, participants, groups, username):
-    path = '../data/pending_meetings.json'
-    meeting = {'name': name, 'description': description, 'time_start': time, 'time_end': endtime, 'date': date,
-                    'participants': participants + [username], 'groups': groups}
-    return add_meeting(path, meeting)
+    try:
+        back.create_pending_meeting(name, description, date, time, endtime, groups, participants)
+        return True
+    except Exception as e:
+        print(e)
+        return False
 
 def remove_meeting(path, id):
     try:
@@ -147,6 +147,15 @@ def get_all_groups():
 
 
 def get_Selected_users(list_widget):
+    """
+    Get the selected users from a list widget.
+
+    Args:
+        list_widget (QListWidget): The list widget containing the users.
+
+    Returns:
+        list: A list of the selected users.
+    """
     selected_users = []
     for i in range(list_widget.count()):
         if list_widget.item(i).checkState():
@@ -154,6 +163,16 @@ def get_Selected_users(list_widget):
     return selected_users
 
 def identify_conflicts(accepted_meetings: list[AgendaItem], pending_meetings: list[AgendaItem] = None) -> list[int]:
+    """
+    Identify conflicts between meetings.
+
+    Args:
+        accepted_meetings (list[AgendaItem]): A list of accepted meetings.
+        pending_meetings (list[AgendaItem]): A list of pending meetings. Defaults to None.
+
+    Returns:
+        list[int]: A list of IDs of conflicting meetings
+    """
     conflicts = []
     if pending_meetings:
         for i in range(len(accepted_meetings)):
@@ -173,6 +192,18 @@ def identify_conflicts(accepted_meetings: list[AgendaItem], pending_meetings: li
     return conflicts
 
 def times_clash(start1, end1, start2, end2, date1, date2):
+    """
+    Check if two events clash in time.
+
+    Args:
+        start1 (datetime): The start time of the first event.
+        end1 (datetime): The end time of the first event.
+        start2 (datetime): The start time of the second event.
+        end2 (datetime): The end time of the second event.
+        date1 (datetime): The date of the first event.
+        date2 (datetime): The date of the second event.
+
+    """
     return start1 <= end2 and start2 <= end1 and date1 == date2
 
 

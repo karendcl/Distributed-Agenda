@@ -8,19 +8,18 @@ class CalendarEvent(ABC):
     """
 
     @abstractmethod
-    def __init__(self, from_user, title, date, place, start_time, end_time, group_id, id=None):
+    def __init__(self, title, description, date, start_time, end_time, participants, groups):
         """
         Inicializa un nuevo evento.
 
         Args:
-            from_user (str): El alias del usuario que creó el evento.
-            title (str): El título del evento.
-            date (date): La fecha del evento.
-            place (str): El lugar del evento.
-            start_time (time): La hora de inicio del evento.
-            end_time (time): La hora de finalización del evento.
-            group_id (str): El ID del group al que pertenece el evento.
-            id (str, optional): El ID único del evento. Si no se proporciona, se usa el título. Defaults to None.
+               title (str): El título del evento.
+                description (str): La descripción del evento.
+                date (date): La fecha del evento.
+                start_time (time): La hora de inicio del evento.
+                end_time (time): La hora de finalización del evento.
+                participants (list): Una lista de usuarios que participarán en el evento.
+                groups (list): Una lista de grupos a los que pertenece el evento
         """
         pass
 
@@ -59,28 +58,31 @@ class CalendarEvent(ABC):
 
 class Event(CalendarEvent):
 
-    def __init__(self, creator, event_name, date, place, start_time, end_time, group_id, id=None):
+    def __init__(self, title, description, date, start_time, end_time, participants, groups):
         """
         Inicializa un nuevo evento.
 
         Args:
-            creator (str): El alias del usuario que creó el evento.
-            event_name (str): El nombre del evento.
-            date (date): La fecha del evento.
-            place (str): El lugar del evento.
-            start_time (time): La hora de inicio del evento.
-            end_time (time): La hora de finalización del evento.
-            group_id (str): El ID del group al que pertenece el evento.
-            id (str, optional): El ID único del evento. Si no se proporciona, se usa el título. Defaults to None.
+               title (str): El título del evento.
+                description (str): La descripción del evento.
+                date (date): La fecha del evento.
+                start_time (time): La hora de inicio del evento.
+                end_time (time): La hora de finalización del evento.
+                participants (list): Una lista de usuarios que participarán en el evento.
+                groups (list): Una lista de grupos a los que pertenece el evento
         """
-        self.creator = creator
-        self.event_name = event_name
+        self.title = title
+        self.description = description
         self.date = date
-        self.place = place
         self.start_time = start_time
         self.end_time = end_time
-        self.group_id= group_id
-        self.event_id = id or self.event_name
+        self.participants = participants
+        self.groups = groups
+        self.event_id = str(hash(title+str(date)+str(start_time)+str(end_time)+str(participants)+str(groups)))
+        self.confirmed = False
+        self.rejected = False
+        self.pending_confirmations = participants.copy()
+
 
     def __eq__(self, other_event) -> bool:
         """
@@ -103,7 +105,7 @@ class Event(CalendarEvent):
         Returns:
             str: Una cadena que representa el evento.
         """
-        return f"{self.title}\n ID:{self.event_id}\n Date:{str(self.date)[:10]}\n Place: {self.place}\n Time: {str(self.start_time)[:5]}-{str(self.end_time)[:5]}\n Group: {self.group_id}\n"
+        return f"{self.title}\n Date:{str(self.date)[:10]}\n Time: {str(self.start_time)[:5]}-{str(self.end_time)[:5]}\n"
     
     def dicc(self):
         """
@@ -113,14 +115,14 @@ class Event(CalendarEvent):
             dict: Un diccionario con los atributos del evento.
         """
         return {'class':'event',
-                'id':self.event_id,
-                'from_user':self.from_user,
                 'title':self.title,
-                'date':str(self.date)[:10],
-                'place':self.place,
-                'start_time':str(self.start_time)[:5],
-                'end_time':str(self.end_time)[:5],
-                'group':self.group_id                
+                'description':self.description,
+                'date':str(self.date),
+                'start_time':str(self.start_time),
+                'end_time':str(self.end_time),
+                'participants':self.participants,
+                'groups':self.groups,
+                'id':self.event_id
         }
         
 

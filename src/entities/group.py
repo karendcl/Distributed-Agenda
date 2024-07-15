@@ -236,7 +236,7 @@ class Group(ABC):
         pass    
 
     @abstractmethod
-    def add_event(self,author_id,title,date,place,start_time,end_time, users, id=None):
+    def add_event(self,event):
         """
         Agrega un evento al grupo.
         """
@@ -340,30 +340,13 @@ class IndependentGroup(Group):
         """
         return 'Independent'
 
-    def add_event(self,author_id,title,date,place,start_time,end_time, users, id=None):
+
+    def add_event(self, event: Event):
         """
         Agrega un evento al grupo.
         """
-
-        event = Event(author_id,title,date,place,start_time,end_time, self.group_id,id)
-
-        if len(self.users) == 1 and author_id in self.users:
-            self.events.append(event.event_id)
-            print(f"Evento {event.title} agregado correctamente al grupo {self.group_name}")
-            return event,None
-
-        request = EventRequest(self.group_id,author_id,len(self.users)-1,event.event_id)
-        for user in users:
-            if user.alias == author_id:
-                continue
-            self.send_request(request.request_id, user)
-
-        self.requests.append(request.request_id)
-        self.waiting_events.append(event.event_id)
-
-        print(f"Solicitud de evento enviada a los usuarios del grupo {self.group_id}")
-
-        return event, request
+        self.events.append(event.event_id)
+        print(f"Evento {event.event_id} agregado correctamente al grupo {self.group_id}")
 
     def set_event(self, event, **fields):
         """
@@ -569,20 +552,12 @@ class HierarchicalGroup(Group):
         print(f"El usuario {user_to_change} no está en el grupo {self.group_id}")
         
 
-    def add_event(self, author_id, title, date,place, start_time, end_time, users,id=None):
+    def add_event(self, event):
         """
         Agrega un evento al grupo.
         """
-        event = Event(author_id,title,date,place,start_time,end_time, self.group_id,id)
-        
-        if author_id in self.admins:
-                self.events.append(event.event_id)
-                print(f"Evento {event.event_id} agregado correctamente al grupo {self.group_id}")                
-                return event, None
-        else:
-            print(f"User {author_id} is not an a group administrator and therefore cannot create events.")
-
-        return None, None
+        self.events.append(event.event_id)
+        print(f"Evento {event.event_id} agregado correctamente al grupo {self.group_id}")
     
     def set_event(self, event, **fields):
         """
@@ -757,7 +732,7 @@ class GlobalGroup(Group):
                 'name': self.group_name,
                 'users': self.users}
 
-    def add_event(self,from_user_id,title,date,place,start_time,end_time, users, id=None):
+    def add_event(self,event):
         pass                
 
     def remove_event(self, time,date,start_time,end_time, users):
