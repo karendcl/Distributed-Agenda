@@ -200,7 +200,7 @@ class Agenda:
         self.set(event.event_id, event.dicc())
 
         user = self.get(self.logged_user)
-        user.add_confirmed_event(event)
+        user.create_event(event)
         self.set(user.alias, user.dicc())
 
         for p in participants:
