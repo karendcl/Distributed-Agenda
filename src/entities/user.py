@@ -236,7 +236,7 @@ class User:
                 'alias':self.alias,
                 'password':self.password,
                 'logged':self.active, 
-                'inbox':self.requests, 
+                # 'inbox':self.requests, 
                 'groups':self.groups}
 
 
