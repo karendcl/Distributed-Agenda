@@ -141,7 +141,6 @@ class Agenda:
         print(ans)
         return ans
     
-    #Por ahora simplemente imprime los usuarios del grupo global, adaptalo para que lo devuelva
     def get_all_users(self):
         global_group_id = "global"
         global_group = self.get(global_group_id)
