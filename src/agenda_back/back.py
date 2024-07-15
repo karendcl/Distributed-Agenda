@@ -148,7 +148,7 @@ class Agenda:
         ans = []
         if global_group:
             for u in global_group.users:
-                ans.append(u.alias)
+                ans.append(u)
         return ans
 
     def groups_of_user(self):
