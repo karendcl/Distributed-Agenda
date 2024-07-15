@@ -1,5 +1,6 @@
 import sys
 import os
+from typing import List
 
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -504,7 +505,7 @@ class MainWindow(QMainWindow):
         self.view_pending_meetings(username)
 
 
-    def createTable(self, agenda : [AgendaItem], username, need_to_accept = False, pending = None):
+    def createTable(self, agenda : List[AgendaItem], username, need_to_accept = False, pending = None):
         conflicts = identify_conflicts(agenda, pending)
         table = QTableWidget()
         table.setRowCount(len(agenda))

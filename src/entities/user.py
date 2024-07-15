@@ -1,10 +1,3 @@
-import uuid
-
-import sys
-import os
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from entities.group import Group, IndependentGroup, HierarchicalGroup
 from entities.event import Event
 from entities.group import Request
@@ -15,7 +8,7 @@ class User:
     Representa un usuario de la agenda distribuida.
     """
 
-    def __init__(self, alias, full_name, password):
+    def __init__(self, alias, password):
         """
         Inicializa un nuevo usuario.
 
@@ -25,7 +18,6 @@ class User:
             password (str): La contraseña del usuario.
         """
         self.alias = alias
-        self.full_name = full_name
         self.password = password
         self.requests = []  # Lista de IDs de solicitudes recibidas
         self.groups = []  # Lista de IDs de grupos a los que pertenece el usuario
@@ -237,7 +229,6 @@ class User:
     def dicc(self):
         return {'class': 'user',
                 'alias':self.alias,
-                'full_name':self.full_name,
                 'password':self.password,
                 'logged':self.active, 
                 'inbox':self.requests, 

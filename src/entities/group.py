@@ -736,5 +736,59 @@ class HierarchicalGroup(Group):
                 'waiting_users':self.waiting_users,
                 'admins':self.admins}
 
+class GlobalGroup(Group):
+    def __init__(self, name, id=None) -> None:
+        super().__init__(name, id)
+        self.users = []  # Inicializa la lista de usuarios
+
+    def get_type(self):
+        return "global"
+
+    def add_user(self, from_user_alias, user_to_add):
+        """
+        Agrega un usuario al workspace global. No se requiere autorización.
+        """
+        if user_to_add.alias not in self.users:
+            self.users.append(user_to_add.alias)
+            print(f"User {user_to_add.alias} successfully added to global workspace.")
+            print(self.users)
+        else:
+            print(f"User {user_to_add.alias} already exists in the global workspace.")
+        return None
+
+    def remove_user(self, from_user_alias, user_to_remove):
+        """
+        Elimina un usuario del workspace global. No se requiere autorización.
+        """
+        if user_to_remove.alias in self.users:
+            self.users.remove(user_to_remove.alias)
+            print(f"User {user_to_remove.alias} successfully removed from global workspace.")
+        else:
+            print(f"User {user_to_remove.alias} does not exist in the global workspace.")
+        return None
+
+    def dicc(self):
+        return {'class': 'workspace',
+                'id': self.workspace_id,
+                'type': self.get_type(),
+                'name': self.name,
+                'users': self.users}
+
+    def add_event(self,from_user_id,title,date,place,start_time,end_time, users, id=None):
+        pass                
+
+    def remove_event(self, time,date,start_time,end_time, users):
+        pass
+
+    def change_workspace_type(self):
+        pass
+
+    def __repr__(self) -> str:
+        return self.users
+    
+    def __str__(self) -> str:
+        return self.users
+    
+
 
 
