@@ -28,7 +28,8 @@ def create_group(group_name, selected_users, hierarchical, username):
         selected_users = [] if not selected_users else selected_users
         back.create_group(group_name,selected_users,hierarchical)
         return True
-    except:
+    except Exception as e:
+        print(e)
         return False
 
 def get_groups_of_user(username):

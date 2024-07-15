@@ -304,13 +304,13 @@ class Group(ABC):
         """
         Devuelve una representación de cadena del grupo.
         """
-        return self.name
+        return self.group_name
     
     def __str__(self) -> str:
         """
         Devuelve una representación de cadena del grupo.
         """
-        return self.name
+        return self.group_name
     
 
 
@@ -332,7 +332,7 @@ class IndependentGroup(Group):
         """
         Devuelve una representación de cadena del grupo.
         """
-        return f"""{self.name}:\n ID: {self.group_id}\n Users: {self.users}\n Events:{self.events}"""
+        return f"""{self.group_name}:\n ID: {self.group_id}\n Users: {self.users}\n Events:{self.events}"""
 
     def get_type(self):
         """
@@ -349,7 +349,7 @@ class IndependentGroup(Group):
 
         if len(self.users) == 1 and author_id in self.users:
             self.events.append(event.event_id)
-            print(f"Evento {event.title} agregado correctamente al grupo {self.name}")
+            print(f"Evento {event.title} agregado correctamente al grupo {self.group_name}")
             return event,None
 
         request = EventRequest(self.group_id,author_id,len(self.users)-1,event.event_id)
@@ -461,7 +461,7 @@ class IndependentGroup(Group):
                     self.waiting_events.remove(event_id) 
                 
                 else:
-                    new_group = HierarchicalGroup(self.name,self.group_id)
+                    new_group = HierarchicalGroup(self.group_name,self.group_id)
 
                     new_group.events = self.events
                     new_group.users = self.users
@@ -505,7 +505,7 @@ class IndependentGroup(Group):
             return None, None
         
         if len(self.users) == 1 and author_id in self.users:
-            new_group = HierarchicalGroup(self.name,self.group_id)
+            new_group = HierarchicalGroup(self.group_name,self.group_id)
 
             new_group.events = self.events
             new_group.users = self.users
@@ -531,7 +531,7 @@ class IndependentGroup(Group):
         return {'class':'group',
                 'id':self.group_id,
                 'type':self.get_type(), 
-                "name":self.name,
+                "name":self.group_name,
                 'events':self.events,                
                 'users':self.users, 
                 'requests':self.requests, 
@@ -557,7 +557,7 @@ class HierarchicalGroup(Group):
         """
         Devuelve una representación de cadena del grupo.
         """
-        return f"""{self.name}:\n ID: {self.group_id}\n Users: {self.users}\n Events:{self.events}\n Admins: {self.admins}"""
+        return f"""{self.group_name}:\n ID: {self.group_id}\n Users: {self.users}\n Events:{self.events}\n Admins: {self.admins}"""
 
 
     def get_type(self):
@@ -715,7 +715,7 @@ class HierarchicalGroup(Group):
             print(f"No puedes cambiar el tipo del grupo {self.group_id} porque no eres administrador.")
             return None, None
         
-        new_group = IndependentGroup(self.name, self.group_id)
+        new_group = IndependentGroup(self.group_name, self.group_id)
 
         new_group.events = self.events
         new_group.users = self.users
@@ -729,7 +729,7 @@ class HierarchicalGroup(Group):
         return {'class':'group',
                 'id':self.group_id,
                 'type':self.get_type(), 
-                "name":self.name,
+                "name":self.group_name,
                 'events':self.events,                
                 'users':self.users,
                 'requests': self.requests,

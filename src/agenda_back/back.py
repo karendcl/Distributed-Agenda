@@ -70,7 +70,8 @@ class Agenda:
 
         try:
             data = eval(eval(data)[1])
-        except:
+        except Exception as e:
+            print(e)
             data = eval(data)
 
         return self.back.create(data)
