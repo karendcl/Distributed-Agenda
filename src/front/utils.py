@@ -58,14 +58,14 @@ def parse_event_to_AgendaItem(events):
 def get_meetings(username):
     ans = back.get_confirmed_meetings()
     ans.sort(key=lambda x: (x.date, x.start_time))
-    return ans
+    return parse_event_to_AgendaItem(ans)
 
 def get_pending_meetings(username):
     ans = back.get_pending_meetings()
     ans.sort(key=lambda x: (x.date, x.start_time))
-    return ans
+    return parse_event_to_AgendaItem(ans)
 
-def create_meeting(name, description, time,endtime, date, participants, groups, username):
+def create_meeting(name, description, time, endtime, date, participants, groups, username):
     try:
         back.create_pending_meeting(name, description, date, time, endtime, groups, participants)
         return True
@@ -73,46 +73,14 @@ def create_meeting(name, description, time,endtime, date, participants, groups, 
         print(e)
         return False
 
-def remove_meeting(path, id):
-    try:
-        with open(path, 'r') as f:
-            meetings = json.load(f)
-    except FileNotFoundError:
-        return False
-    meeting = meetings.pop(str(id))
-    with open(path, 'w') as f:
-        json.dump(meetings, f)
-    return meeting
 
-def add_meeting(path, meet):
-    try:
-        with open(path, 'r') as f:
-            meetings = json.load(f)
-    except FileNotFoundError:
-        meetings = {}
-
-    id = len(meetings)
-    meetings[id] = meet
-
-    with open(path, 'w') as f:
-        json.dump(meetings, f)
-    return True
 
 def accept_meeting(username, id):
-    path = '../data/pending_meetings.json'
-
-    meet = remove_meeting(path, id)
-    if not meet:
-        return False
-
-    path = '../data/meetings.json'
-    return add_meeting(path, meet)
+    return back.accept_meeting(id)
 
 
 def decline_meeting(username, id):
-    path = '../data/pending_meetings.json'
-    meeting = remove_meeting(path, id)
-    return False if not meeting else True
+    return back.reject_meeting(id)
 
 def get_all_users(username):
     users = back.get_all_users()

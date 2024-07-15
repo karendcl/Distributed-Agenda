@@ -58,7 +58,6 @@ class User:
         self.pending_events.append(event.event_id)
         print(f"Event {event.title} added to user {self.alias} pending events")
 
-    
     def create_group(self, group_name, group_type,id=None):
         """
         Crea un nuevo grupo.

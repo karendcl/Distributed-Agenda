@@ -81,7 +81,76 @@ class Event(CalendarEvent):
         self.event_id = str(hash(title+str(date)+str(start_time)+str(end_time)+str(participants)+str(groups)))
         self.confirmed = False
         self.rejected = False
-        self.pending_confirmations = participants.copy()
+        self.pending_confirmations_people = participants.copy()
+        self.pending_confirmations_groups = groups.copy()
+
+
+    def user_confirm(self, user):
+        """
+        Confirma la asistencia de un usuario al evento.
+
+        Args:
+            user (str): El alias del usuario que confirma asistencia.
+        """
+        if user in self.pending_confirmations_people:
+            self.pending_confirmations_people.remove(user)
+            print(f"User {user} confirmed attendance to event {self.title}")
+        else:
+            print(f"User {user} is not pending confirmation for event {self.title}")
+
+        self.confirm()
+    def user_reject(self, user):
+        """
+        Rechaza la asistencia de un usuario al evento.
+
+        Args:
+            user (str): El alias del usuario que rechaza asistencia.
+        """
+        if user in self.pending_confirmations_people:
+            self.pending_confirmations_people.remove(user)
+            self.rejected = True
+            print(f"User {user} rejected attendance to event {self.title}")
+        else:
+            print(f"User {user} is not pending confirmation for event {self.title}")
+
+    def group_confirm(self, group):
+        """
+        Confirma la asistencia de un grupo al evento.
+
+        Args:
+            group (str): El nombre del grupo que confirma asistencia.
+        """
+        if group in self.pending_confirmations_groups:
+            self.pending_confirmations_groups.remove(group)
+            print(f"Group {group} confirmed attendance to event {self.title}")
+        else:
+            print(f"Group {group} is not pending confirmation for event {self.title}")
+
+        self.confirm()
+
+    def group_reject(self, group):
+        """
+        Rechaza la asistencia de un grupo al evento.
+
+        Args:
+            group (str): El nombre del grupo que rechaza asistencia.
+        """
+        if group in self.pending_confirmations_groups:
+            self.pending_confirmations_groups.remove(group)
+            self.rejected = True
+            print(f"Group {group} rejected attendance to event {self.title}")
+        else:
+            print(f"Group {group} is not pending confirmation for event {self.title}")
+
+    def confirm(self):
+        """
+        Confirma la asistencia de todos los participantes al evento.
+        """
+        if len(self.pending_confirmations_people) == 0 and len(self.pending_confirmations_groups) == 0 and not self.rejected:
+            self.confirmed = True
+            print(f"All participants confirmed attendance to event {self.title}")
+        else:
+            print(f"Not all participants have confirmed attendance to event {self.title}")
 
 
     def __eq__(self, other_event) -> bool:
@@ -106,7 +175,8 @@ class Event(CalendarEvent):
             str: Una cadena que representa el evento.
         """
         return f"{self.title}\n Date:{str(self.date)[:10]}\n Time: {str(self.start_time)[:5]}-{str(self.end_time)[:5]}\n"
-    
+
+
     def dicc(self):
         """
         Devuelve un diccionario que representa el evento.
@@ -125,7 +195,8 @@ class Event(CalendarEvent):
                 'id':self.event_id,
                 'confirmed':self.confirmed,
                 'rejected':self.rejected,
-                'pending_confirmations':self.pending_confirmations
+                'pending_confirmations_people':self.pending_confirmations_people,
+                'pending_confirmations_groups':self.pending_confirmations_groups
         }
         
 

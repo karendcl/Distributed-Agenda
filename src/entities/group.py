@@ -326,7 +326,7 @@ class IndependentGroup(Group):
         super().__init__(name,id)  
         self.requests = []      
         self.waiting_events = []
-        self.waiting_users = []
+        self.waiting_users = [[]]
 
     def __str__(self) -> str:
         """
@@ -345,8 +345,31 @@ class IndependentGroup(Group):
         """
         Agrega un evento al grupo.
         """
-        self.events.append(event.event_id)
+        self.waiting_events.append(event.event_id)
+        self.waiting_users.append(self.users)
         print(f"Evento {event.event_id} agregado correctamente al grupo {self.group_id}")
+
+    def confirm_event(self, event, user):
+        """
+        Remove pending user from pending event
+        if all users have confirmed it, then accept it
+
+        :param event:
+        :param user:
+        :return:
+        """
+        index = self.waiting_events.index(event)
+        if user in self.waiting_users[index]:
+            self.waiting_users[index].remove(user)
+            if len(self.waiting_users[index]) == 0:
+                self.waiting_events.remove(event)
+                self.waiting_users.remove([])
+                self.events.append(event)
+                print(f"Evento {event} confirmado por todos los usuarios.")
+                return True
+        else:
+            print(f"El usuario {user} no está en la lista de usuarios pendientes del evento {event}")
+        return False
 
     def set_event(self, event, **fields):
         """
@@ -516,6 +539,7 @@ class HierarchicalGroup(Group):
         """
         super().__init__(name,id)
         self.requests = []
+        self.waiting_events = []
         self.waiting_users = []
         self.admins = [] 
 
@@ -556,8 +580,22 @@ class HierarchicalGroup(Group):
         """
         Agrega un evento al grupo.
         """
-        self.events.append(event.event_id)
+        self.waiting_events.append(event.event_id)
         print(f"Evento {event.event_id} agregado correctamente al grupo {self.group_id}")
+
+    def confirm_event(self, event, user):
+        if user not in self.admins:
+            print(f"El usuario {user} no puede confirmar eventos en el grupo {self.group_id} porque no es administrador.")
+            return False
+
+        if event in self.waiting_events:
+            self.waiting_events.remove(event)
+            self.events.append(event)
+            print(f"Evento {event} confirmado por el usuario {user}")
+            return True
+
+        print(f"El evento {event} no está en la lista de eventos pendientes del grupo {self.group_id}")
+        return False
     
     def set_event(self, event, **fields):
         """

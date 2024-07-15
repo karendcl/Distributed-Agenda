@@ -274,6 +274,67 @@ class Agenda:
         return ans
 
 
+    def accept_meeting(self, event_id):
+        user = self.get(self.logged_user)
+        event = self.get(event_id)
+
+        if user.alias in event.pending_confirmations_people:
+            event.user_confirm(user.alias)
+            self.set(event.event_id, event.dicc())
+            self.set(user.alias, user.dicc())
+            return True
+
+        else:
+            for group_id in event.pending_confirmations_groups:
+                group = self.get(group_id)
+                if group.type == 'hierarchical' and user.alias in group.admins:
+                    confirmed = group.confirm_event(event.event_id, user.alias)
+                    if confirmed:
+                        event.group_confirm(group_id)
+                        self.set(event.event_id, event.dicc())
+                    self.set(group.group_id, group.dicc())
+                elif group.type == 'independent':
+                    confirmed = group.confirm_event(event.event_id, user.alias)
+                    if confirmed:
+                        event.group_confirm(group_id)
+                        self.set(event.event_id, event.dicc())
+                    self.set(group.group_id, group.dicc())
+                return True
+
+        return False
+
+    def reject_meeting(self, event_id):
+        user = self.get(self.logged_user)
+        event = self.get(event_id)
+
+        if user.alias in event.pending_confirmations_people:
+            event.user_reject(user.alias)
+            self.set(event.event_id, event.dicc())
+            self.set(user.alias, user.dicc())
+            return True
+
+        else:
+            for group_id in event.pending_confirmations_groups:
+                group = self.get(group_id)
+                if group.type == 'hierarchical' and user.alias in group.admins:
+                    rejected = group.reject_event(event.event_id, user.alias)
+                    if rejected:
+                        event.group_reject(group_id)
+                        self.set(event.event_id, event.dicc())
+                    self.set(group.group_id, group.dicc())
+                elif group.type == 'independent':
+                    rejected = group.reject_event(event.event_id, user.alias)
+                    if rejected:
+                        event.group_reject(group_id)
+                        self.set(event.event_id, event.dicc())
+                    self.set(group.group_id, group.dicc())
+                return True
+
+        return False
+
+
+
+
 
     # NOT DONE ------------------------
 
