@@ -183,16 +183,10 @@ class Agenda:
                 user_.add_to_group(name)
 
     # NOT DONE ------------------------
-    def logout(self, args):
-
-        if not self._already_logged():
-            print("There is no user logged")
-            return
-
+    def logout(self, username):
         user = self.get(self.logged_user)
         user.active = False
         self.set(user.alias, user.dicc())
-        print(f"Bye {self.logged_user}!")
         self.logged_user = None
 
     def inbox(self, args):

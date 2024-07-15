@@ -116,7 +116,10 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("Agenda")
         self.setGeometry(100, 100, 400, 200)
+        self.initial()
 
+    def initial(self):
+        self.setGeometry(100, 100, 400, 200)
         layout = QVBoxLayout()
 
         label = QTitleLabel("Your personal agenda")
@@ -124,11 +127,11 @@ class MainWindow(QMainWindow):
 
         button_log_in = QPushButton("Log In")
         button_log_in.clicked.connect(self.on_login_click)
-        layout.addWidget(button_log_in, alignment = Qt.AlignCenter)
+        layout.addWidget(button_log_in, alignment=Qt.AlignCenter)
 
         button_sign_up = QPushButton("Sign Up")
         button_sign_up.clicked.connect(self.on_signup_click)
-        layout.addWidget(button_sign_up, alignment = Qt.AlignCenter)
+        layout.addWidget(button_sign_up, alignment=Qt.AlignCenter)
 
         widget = QWidget()
         widget.setLayout(layout)
@@ -321,9 +324,18 @@ class MainWindow(QMainWindow):
         view_others_agenda_btn.clicked.connect(lambda: self.view_others_agenda(username))
         layout.addWidget(view_others_agenda_btn, alignment=Qt.AlignCenter)
 
+        log_out_btn = QPushButton("Log Out")
+        log_out_btn.clicked.connect(lambda: self.logout(username))
+        layout.addWidget(log_out_btn, alignment=Qt.AlignCenter)
+
+
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
+
+    def logout(self, username):
+        logout_(username)
+        self.initial()
 
     def view_others_agenda(self, username):
         self.setMaximumSize(400, 300)

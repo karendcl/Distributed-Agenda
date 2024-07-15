@@ -40,6 +40,9 @@ def hash_password(password):
 def login(username, password):
     return back.login(username,password)
 
+def logout_(username):
+    back.logout(username)
+
 def signup(username, password):
     pass_ = hash_password(password)
     return back.register(username,pass_)
