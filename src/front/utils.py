@@ -131,22 +131,12 @@ def decline_meeting(username, id):
     return False if not meeting else True
 
 def get_all_users(username):
-    path = '../data/users.json'
-    try:
-        with open(path, 'r') as f:
-            users = json.load(f)
-    except FileNotFoundError:
-        return []
-    return [user for user in users.keys() if user != username]
+    users = back.get_all_users()
+    ans = [x for x in users if x != username]
+    return ans
 
 def get_all_groups():
-    path = '../data/groups.json'
-    try:
-        with open(path, 'r') as f:
-            groups = json.load(f)
-    except FileNotFoundError:
-        return []
-    return groups.keys()
+    return back.groups_of_user()
 
 # todo once a leader accepts it, all group participants get it
 

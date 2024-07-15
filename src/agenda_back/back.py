@@ -48,7 +48,7 @@ class Agenda:
         if global_group is None:
             print("Creating global_group")
             # Crea el group global
-            new_group = self.factory.create({
+            new_group = self.back.create({
                 'class': 'group',
                 'id': global_group_id,
                 'type': 'global',
@@ -144,12 +144,11 @@ class Agenda:
     def get_all_users(self):
         global_group_id = "global"
         global_group = self.get(global_group_id)
+        ans = []
         if global_group:
-            print(f"Users:")
             for u in global_group.users:
-                print(f"- {u}")
-        else:
-            return []
+                ans.append(u.alias)
+        return ans
 
     def groups_of_user(self):
 
@@ -182,12 +181,14 @@ class Agenda:
                 user_ = self.get(us)
                 user_.add_to_group(name)
 
-    # NOT DONE ------------------------
     def logout(self, username):
         user = self.get(self.logged_user)
         user.active = False
         self.set(user.alias, user.dicc())
         self.logged_user = None
+
+    # NOT DONE ------------------------
+
 
     def inbox(self, args):
 
