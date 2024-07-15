@@ -57,10 +57,9 @@ class Back:
 
         try:
             user.active = object['logged']
-            user.requests = object['inbox']
             user.groups = object['groups']
-        except:
-            ...
+        except Exception as e:
+            print(e)
 
         return user
 
