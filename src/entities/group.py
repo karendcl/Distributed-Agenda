@@ -371,6 +371,24 @@ class IndependentGroup(Group):
             print(f"El usuario {user} no está en la lista de usuarios pendientes del evento {event}")
         return False
 
+    def reject_event(self, event, user):
+        """
+        Remove pending user from pending event
+
+        :param event:
+        :param user:
+        :return:
+        """
+        index = self.waiting_events.index(event)
+        if user in self.waiting_users[index]:
+            self.waiting_users[index].remove(user)
+            self.waiting_events.remove(event)
+            print(f"Evento {event} rechazado por el usuario {user}")
+            return True
+        else:
+            print(f"El usuario {user} no está en la lista de usuarios pendientes del evento {event}")
+        return False
+
     def set_event(self, event, **fields):
         """
         Modifica un evento existente.
@@ -596,7 +614,19 @@ class HierarchicalGroup(Group):
 
         print(f"El evento {event} no está en la lista de eventos pendientes del grupo {self.group_id}")
         return False
-    
+
+    def reject_event(self, event, user):
+        if user not in self.admins:
+            print(f"El usuario {user} no puede rechazar eventos en el grupo {self.group_id} porque no es administrador.")
+            return False
+
+        if event in self.waiting_events:
+            self.waiting_events.remove(event)
+            print(f"Evento {event} rechazado por el usuario {user}")
+            return True
+
+        print(f"El evento {event} no está en la lista de eventos pendientes del grupo {self.group_id}")
+        return False
     def set_event(self, event, **fields):
         """
         Modifica un evento existente.

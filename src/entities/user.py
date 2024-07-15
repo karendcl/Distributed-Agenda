@@ -237,7 +237,10 @@ class User:
                 'alias':self.alias,
                 'password':self.password,
                 'logged':self.active, 
-                'groups':self.groups}
+                'groups':self.groups,
+                'confirmed_events':self.confirmed_events,
+                'pending_events':self.pending_events
+                }
 
 
     def __repr__(self) -> str:
