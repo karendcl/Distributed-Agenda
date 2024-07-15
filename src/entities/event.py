@@ -122,7 +122,10 @@ class Event(CalendarEvent):
                 'end_time':str(self.end_time),
                 'participants':self.participants,
                 'groups':self.groups,
-                'id':self.event_id
+                'id':self.event_id,
+                'confirmed':self.confirmed,
+                'rejected':self.rejected,
+                'pending_confirmations':self.pending_confirmations
         }
         
 

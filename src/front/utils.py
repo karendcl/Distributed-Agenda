@@ -48,29 +48,12 @@ def signup(username, password):
     pass_ = hash_password(password)
     return back.register(username,pass_)
 
-def get_meeting(username,path):
-    try:
-        with open(path, 'r') as f:
-            meetings = json.load(f)
-    except FileNotFoundError:
-        return []
 
-    try:
-        with open('../data/groups.json','r') as f:
-            groups = json.load(f)
-    except FileNotFoundError:
-        groups = {}
-
-    groups_admin = []
-    for key,value in groups.items():
-        if username == value['admin'] and value['hierarchical']:
-            groups_admin.append(key)
-
-
-    return [AgendaItem(meeting['name'], meeting['description'], meeting['time_start'], meeting['time_end'], meeting['date'], ind)
-            for ind, meeting in enumerate(meetings.values())
-            if username in meeting['participants']
-            or [g for g in meeting['groups'] if g in groups_admin] != []]
+def parse_event_to_AgendaItem(events):
+    ans = []
+    for event in events:
+        ans.append(AgendaItem(event.title, event.description, event.start_time, event.end_time, event.date, event.event_id))
+    return ans
 
 def get_meetings(username):
     ans = back.get_confirmed_meetings()

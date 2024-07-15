@@ -153,7 +153,11 @@ class Agenda:
 
     def groups_of_user(self):
         user = self.get(self.logged_user)
-        return user.groups
+        ans = []
+        for g in user.groups:
+            ans.append(g)
+        return ans
+
 
     def create_group(self, name, users, hierarchical):
 
@@ -174,9 +178,9 @@ class Agenda:
                 user_.add_to_group(name)
                 self.set(user_.alias, user_.dicc())
 
+                new_group = self.get(name)
                 new_group.add_user(user.alias, user_)
                 self.set(new_group.group_id, new_group.dicc())
-
 
 
     def logout(self, username):
@@ -230,6 +234,44 @@ class Agenda:
             if event.confirmed:
                 ans.append(event)
         return ans
+
+    def get_pending_group_meetings(self):
+        user = self.get(self.logged_user)
+
+        ans = []
+        for group_id in user.groups:
+            group = self.get(group_id)
+
+            if group.type == 'independent':
+                for e in group.events:
+                    event = self.get(e)
+                    if not event.confirmed and not event.rejected:
+                        ans.append(event)
+
+            elif group.type == 'hierarchical':
+                if user.alias in group.admins:
+                    for e in group.events:
+                        event = self.get(e)
+                        if not event.confirmed and not event.rejected:
+                            ans.append(event)
+
+        print(f'Pending group meetings: {ans}')
+        return ans
+
+    def get_confirmed_group_meetings(self):
+        user = self.get(self.logged_user)
+
+        ans = []
+        for group_id in user.groups:
+            group = self.get(group_id)
+            for e in group.events:
+                event = self.get(e)
+                if event.confirmed:
+                    ans.append(event)
+        print(f'Confirmed group meetings: {ans}')
+        return ans
+
+
 
     # NOT DONE ------------------------
 
