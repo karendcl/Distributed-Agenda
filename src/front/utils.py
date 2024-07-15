@@ -53,6 +53,7 @@ def get_meeting(username,path):
         with open(path, 'r') as f:
             meetings = json.load(f)
     except FileNotFoundError:
+        print()
         return []
 
     try:

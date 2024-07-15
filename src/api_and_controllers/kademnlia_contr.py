@@ -44,8 +44,8 @@ def bc_server():
             if addr[0] != container_ip:
                 print(f"Received: {data}, from: {addr}")
                 server_socket.sendto(b"OK...hello", addr)
-        except:
-            pass
+        except Exception as e:
+            print(e)
 
 
 def bc_client():
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     # Do something with the loop
     try:
         asyncio.run_coroutine_threadsafe(bc_server(), new_loop)
-    except:
-        pass
+    except Exception as e:
+            print(e)
 
     t.join()
