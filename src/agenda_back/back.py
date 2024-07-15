@@ -181,6 +181,12 @@ class Agenda:
             for us in users:
                 user_ = self.get(us)
                 user_.add_to_group(name)
+                self.set(user_.alias, user_.dicc())
+
+                new_group.add_user(user.alias, user_)
+                self.set(new_group.group_id, new_group.dicc())
+
+
 
     def logout(self, username):
         user = self.get(self.logged_user)

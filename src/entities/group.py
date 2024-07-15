@@ -405,24 +405,7 @@ class IndependentGroup(Group):
         """
         Agrega un usuario al grupo.
         """
-                
-        if from_user_alias not in self.users:
-            print(f"El usuario {from_user_alias} no pertenece al grupo {self.group_id}")
-            return None
-        
-        if user_to_add.alias in self.users:
-            print(f"El usuario {user_to_add.alias} ya pertenece al grupo {self.group_id}")
-            return None
-
-        request = JoinRequest(self.group_id, from_user_alias, 1,user_to_add.alias)
-        self.send_request(request.request_id,user_to_add)
-
-        self.requests.append(request.request_id)
-        self.waiting_users.append(user_to_add.alias)
-
-        print(f"Invitación a unirse enviada al usuario {user_to_add.alias}")
-
-        return request
+        self.users.append(user_to_add.alias)
         
     
     def remove_user(self, from_user, user_to_remove):

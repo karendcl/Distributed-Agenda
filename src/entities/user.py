@@ -68,7 +68,7 @@ class User:
         """
         new_group = None
 
-        if group_type == 'flat':
+        if group_type == 'independent':
             new_group = IndependentGroup(group_name,id)
             new_group.users.append(self.alias)
             self.groups.append(new_group.group_id)
