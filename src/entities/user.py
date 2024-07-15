@@ -76,7 +76,9 @@ class User:
         if group_type == 'independent':
             new_group = IndependentGroup(group_name,id)
             new_group.users.append(self.alias)
+            print(f"B-Groups: {self.groups}")
             self.groups.append(new_group.group_id)
+            print(f"A-Groups: {self.groups}")
         else:
             new_group = HierarchicalGroup(group_name,id)
             new_group.users.append(self.alias)
@@ -236,7 +238,6 @@ class User:
                 'alias':self.alias,
                 'password':self.password,
                 'logged':self.active, 
-                # 'inbox':self.requests, 
                 'groups':self.groups}
 
 

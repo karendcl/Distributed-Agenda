@@ -165,6 +165,7 @@ class Agenda:
         user = self.get(self.logged_user)
 
         new_group = user.create_group(name, type, name)
+        print(f"Set user: {user.dicc()}")
         self.set(user.alias, user.dicc())
         self.set(new_group.group_id, new_group.dicc())
 
@@ -172,6 +173,7 @@ class Agenda:
             for us in users:
                 user_ = self.get(us)
                 user_.add_to_group(name)
+                print(f"Set: {user_.dicc()}")
                 self.set(user_.alias, user_.dicc())
 
                 new_group.add_user(user.alias, user_)
