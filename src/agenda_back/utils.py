@@ -7,7 +7,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from entities.event import Event
 from entities.user import User
-from entities.group import IndependentGroup, HierarchicalGroup, GroupRequest, JoinRequest, EventRequest
+from entities.group import GlobalGroup, IndependentGroup, HierarchicalGroup, GroupRequest, JoinRequest, EventRequest
 
 
 # Function to convert date string to datetime object
@@ -53,7 +53,7 @@ class Back:
 
     def _create_user(self, object):
 
-        user = User(object['alias'], object['full_name'], object['password'])
+        user = User(object['alias'], object['password'])
 
         try:
             user.active = object['logged']
@@ -96,6 +96,9 @@ class Back:
             group.requests = object['requests']
             group.waiting_events = object['waiting_events']
             group.waiting_users = object['waiting_users']
+        elif object['type'] == 'global':  
+            workspace = GlobalGroup(object['name'], object['id'])
+            workspace.users = object['users']
         else:
             group = HierarchicalGroup(object['name'], object['id'])
             group.events = object['events']

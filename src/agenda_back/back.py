@@ -37,6 +37,28 @@ class Agenda:
         self.logged_user = None
         self.api = api
 
+        self.create_global_group() 
+
+    def create_global_group(self):
+        global_group_name = "GlobalGroup"
+        global_group_id = "global"  # Un ID único para el group global
+
+        # Verifica si el group global ya existe
+        global_group = self.get(global_group_id)
+        if global_group is None:
+            print("Creating global_group")
+            # Crea el group global
+            new_group = self.factory.create({
+                'class': 'group',
+                'id': global_group_id,
+                'type': 'global',
+                'users': [], 
+                'name': global_group_name
+            })
+            self.set(global_group_id, new_group.dicc())
+        else:
+            print(f"El group global {global_group_name} ya existe.")
+
     def _already_logged(self):
         return self.logged_user is not None
 
@@ -93,6 +115,12 @@ class Agenda:
 
         self.set(new_user.alias, new_user.dicc())
 
+        global_group_id = "global"
+        global_group = self.get(global_group_id)
+        if global_group:
+            global_group.add_user(self.logged_user, new_user) 
+            self.set(global_group_id, global_group.dicc()) 
+
         return True
 
 
@@ -111,6 +139,17 @@ class Agenda:
 
         print(ans)
         return ans
+    
+    #Por ahora simplemente imprime los usuarios del grupo global, adaptalo para que lo devuelva
+    def get_all_users(self):
+        global_group_id = "global"
+        global_group = self.get(global_group_id)
+        if global_group:
+            print(f"Users:")
+            for u in global_group.users:
+                print(f"- {u}")
+        else:
+            return []
 
     def groups_of_user(self):
 
