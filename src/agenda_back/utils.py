@@ -89,6 +89,7 @@ class Back:
         return request
 
     def _create_group(self, object):
+        group = None
         if object['type'] == 'independent':
             group = IndependentGroup(object['name'], object['id'])
             group.events = object['events']
@@ -97,8 +98,8 @@ class Back:
             group.waiting_events = object['waiting_events']
             group.waiting_users = object['waiting_users']
         elif object['type'] == 'global':  
-            workspace = GlobalGroup(object['name'], object['id'])
-            workspace.users = object['users']
+            group = GlobalGroup(object['name'], object['id'])
+            group.users = object['users']
         else:
             group = HierarchicalGroup(object['name'], object['id'])
             group.events = object['events']

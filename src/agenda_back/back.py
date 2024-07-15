@@ -64,7 +64,7 @@ class Agenda:
 
     def get(self, key):
         data = self.api.get_value(key)[1]
-
+        print(data)
         if data == None or data is None:
             return
 
@@ -82,6 +82,7 @@ class Agenda:
 
     def login(self, username, password):
 
+        print(f"Trying to log in: {username}")
         user = self.get(username)
 
         if user is None or user == None:

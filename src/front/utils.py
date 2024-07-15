@@ -35,10 +35,10 @@ def get_groups_of_user(username):
     return back.group_of_user()
 
 def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
+    return '0o' + hashlib.sha256(password.encode()).hexdigest()
 
 def login(username, password):
-    return back.login(username,password)
+    return back.login(username,hash_password(password))
 
 def logout_(username):
     back.logout(username)

@@ -746,32 +746,32 @@ class GlobalGroup(Group):
 
     def add_user(self, from_user_alias, user_to_add):
         """
-        Agrega un usuario al workspace global. No se requiere autorización.
+        Agrega un usuario al group global. No se requiere autorización.
         """
         if user_to_add.alias not in self.users:
             self.users.append(user_to_add.alias)
-            print(f"User {user_to_add.alias} successfully added to global workspace.")
+            print(f"User {user_to_add.alias} successfully added to global group.")
             print(self.users)
         else:
-            print(f"User {user_to_add.alias} already exists in the global workspace.")
+            print(f"User {user_to_add.alias} already exists in the global group.")
         return None
 
     def remove_user(self, from_user_alias, user_to_remove):
         """
-        Elimina un usuario del workspace global. No se requiere autorización.
+        Elimina un usuario del group global. No se requiere autorización.
         """
         if user_to_remove.alias in self.users:
             self.users.remove(user_to_remove.alias)
-            print(f"User {user_to_remove.alias} successfully removed from global workspace.")
+            print(f"User {user_to_remove.alias} successfully removed from global group.")
         else:
-            print(f"User {user_to_remove.alias} does not exist in the global workspace.")
+            print(f"User {user_to_remove.alias} does not exist in the global group.")
         return None
 
     def dicc(self):
-        return {'class': 'workspace',
-                'id': self.workspace_id,
+        return {'class': 'group',
+                'id': self.group_id,
                 'type': self.get_type(),
-                'name': self.name,
+                'name': self.group_name,
                 'users': self.users}
 
     def add_event(self,from_user_id,title,date,place,start_time,end_time, users, id=None):
@@ -780,7 +780,10 @@ class GlobalGroup(Group):
     def remove_event(self, time,date,start_time,end_time, users):
         pass
 
-    def change_workspace_type(self):
+    def change_group_type(self):
+        pass
+
+    def change_group_type(self):
         pass
 
     def __repr__(self) -> str:
