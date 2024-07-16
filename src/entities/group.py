@@ -338,7 +338,7 @@ class IndependentGroup(Group):
         """
         Devuelve el tipo de grupo.
         """
-        return 'Independent'
+        return 'independent'
 
 
     def add_event(self, event: Event):

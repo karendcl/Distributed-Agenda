@@ -29,7 +29,7 @@ def create_group(group_name, selected_users, hierarchical, username):
         back.create_group(group_name,selected_users,hierarchical)
         return True
     except Exception as e:
-        print(e)
+        print(f"Exception while creating group: {e}")
         return False
 
 def get_groups_of_user(username):
