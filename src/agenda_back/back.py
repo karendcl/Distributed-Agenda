@@ -200,7 +200,7 @@ class Agenda:
             'date': date,
             'start_time': start_time,
             'end_time': end_time,
-            'participants': participants + [self.logged_user],
+            'participants': [self.logged_user] + participants ,
             'groups': groups
         })
 

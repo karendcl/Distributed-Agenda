@@ -81,7 +81,7 @@ class Event(CalendarEvent):
         self.event_id = str(hash(title+str(date)+str(start_time)+str(end_time)+str(participants)+str(groups)))
         self.confirmed = False
         self.rejected = False
-        self.pending_confirmations_people = participants.copy()
+        self.pending_confirmations_people = participants.copy()[1:]
         self.pending_confirmations_groups = groups.copy()
 
 
