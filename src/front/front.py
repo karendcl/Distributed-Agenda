@@ -551,9 +551,10 @@ class MainWindow(QMainWindow):
         conflicts = identify_conflicts(agenda, pending)
         table = QTableWidget()
         table.setRowCount(len(agenda))
-        table.setColumnCount(5) if not need_to_accept else table.setColumnCount(6)
+        table.setColumnCount(5) if not need_to_accept and not to_remove else table.setColumnCount(6)
         headings = ["Name", "Description", "Start", "End", "Date"]
         headings = headings + ["Accept"] if need_to_accept else headings
+        headings = headings + ["Accept"] if to_remove else headings
         table.setHorizontalHeaderLabels(headings)
         for i, item in enumerate(agenda):
             table.setItem(i, 0, QTableWidgetItem(item.name))
