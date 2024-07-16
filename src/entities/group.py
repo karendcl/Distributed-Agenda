@@ -609,8 +609,14 @@ class HierarchicalGroup(Group):
         """
         Agrega un evento al grupo.
         """
-        self.waiting_events.append(event.event_id)
+        confirmed = False
+        if user not in self.admins:
+            self.waiting_events.append(event.event_id)
+        else:
+            self.events.append(event.event_id)
+            confirmed = True
         print(f"Evento {event.event_id} agregado correctamente al grupo {self.group_id}")
+        return confirmed
 
     def confirm_event(self, event, user):
         if user not in self.admins:
