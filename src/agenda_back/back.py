@@ -65,20 +65,20 @@ class Agenda:
     def get(self, key):
         print(f"Key: {key}")
         data = self.api.get_value(key)[1]
+        print(f"Data: {data}")
 
-        if "kademlia.network" in data:
-            # Find the index of the opening square bracket '['
-            start_index = data.find("{") + 1
+        if data == None or data is None:
+            return
+        
+
+        if "kademlia" in data:
+            start_index = data.find("{")
             
-            # Find the index of the closing square bracket ']'
-            end_index = data.rfind("}") - 1
+            end_index = data.rfind("}") + 1
             
             data = data[start_index:end_index]
             print("Clean")
-
-        print(f"Data: {data}")
-        if data == None or data is None:
-            return
+            print(f"Data: {data}")
 
         try:
             print(f"In Try: {eval(data)}")
