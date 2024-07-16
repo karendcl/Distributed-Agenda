@@ -24,12 +24,11 @@ class Back:
 
         self.classes = {'event': lambda obj: self._create_event(obj),
                         'user': lambda obj: self._create_user(obj),
-                        'request': lambda obj: self._create_request(obj),
                         'group': lambda obj: self._create_group(obj)}
 
     def create(self, object):
 
-        if object == None:
+        if object == None or object is None:
             return None
 
         class_name = object['class']
@@ -77,29 +76,6 @@ class Back:
 
         return user
 
-    def _create_request(self, object):
-
-        id = object['id']
-        type = object['type']
-        group_id = object['group_id']
-        from_user_alias = object['from_user_alias']
-        max = object['max']
-        count = object['count']
-        status = object['status']
-
-        if type == 'join':
-            to_user_alias = object['to_user']
-            request = JoinRequest(group_id, from_user_alias, max, to_user_alias, id, count)
-        elif type == 'event':
-            event = object['event']
-            request = EventRequest(group_id, from_user_alias, max, event, id, count)
-        else:
-            admins = object['admins']
-            request = GroupRequest(group_id, from_user_alias, max, admins, id, count)
-
-        request.status = status
-
-        return request
 
     def _create_group(self, object):
         group = None

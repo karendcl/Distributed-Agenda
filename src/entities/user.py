@@ -228,42 +228,7 @@ class User:
             return request
         
         return None
-    
-    def change_group_type(self, group, admins, users):
-        """
-        Cambia el tipo de un grupo.
 
-        Args:
-            group (Group): El grupo al que se va a cambiar el tipo.
-            admins (list): Una lista de alias de los nuevos administradores.
-            users (list): Una lista de usuarios en el grupo.
-
-        Returns:
-            tuple: Una tupla que contiene la solicitud creada y el nuevo grupo, si es necesario.
-        """
-        if group.group_id not in self.groups:
-            print(f"You do not belong to group {group.name}")
-            return None, None
-        
-        if admins != None:
-            not_in_group = []
-
-            for adm in admins:
-                if adm not in group.users:
-                    not_in_group.append(adm)
-
-            if len(not_in_group) > 0:
-                print(f"Users {not_in_group} do not belong to group {group.group_id}")
-                return None, None
-        
-        request, new_group = group.change_group_type(self.alias, admins, users)
-
-        if request != None:
-            self.requests.append(request.request_id)
-
-        return request, new_group
-
-    
     def dicc(self):
         return {'class': 'user',
                 'alias':self.alias,
