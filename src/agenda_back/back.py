@@ -230,8 +230,8 @@ class Agenda:
             ans.append(event)
         return ans
 
-    def get_confirmed_meetings(self):
-        user = self.get(self.logged_user)
+    def get_confirmed_meetings(self, username):
+        user = self.get(username)
         ans = []
         for e in user.confirmed_events:
             event = self.get(e)
@@ -262,8 +262,8 @@ class Agenda:
         print(f'Pending group meetings: {ans}')
         return ans
 
-    def get_confirmed_group_meetings(self):
-        user = self.get(self.logged_user)
+    def get_confirmed_group_meetings(self, username):
+        user = self.get(username)
 
         ans = []
         for group_id in user.groups:
@@ -340,6 +340,42 @@ class Agenda:
 
 
         return was_in_group
+
+    def events_created(self):
+        try:
+            user = self.get(self.logged_user)
+            ans = []
+            for e in user.created_events:
+                event = self.get(e)
+                ans.append(event)
+            return ans
+        except Exception as e:
+            print(e)
+            return []
+
+    def remove_meeting(self, event_id):
+        try:
+
+            event = self.get(event_id)
+
+            for p in event.participants:
+                user = self.get(p)
+                user.remove_event(event)
+                self.set(user.alias, user.dicc())
+
+            for g in event.groups:
+                group = self.get(g)
+                group.remove_event(event)
+                self.set(group.group_id, group.dicc())
+
+            return True
+        except Exception as e:
+            print(e)
+            return False
+
+
+
+
 
 
 

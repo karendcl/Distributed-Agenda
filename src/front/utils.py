@@ -56,8 +56,8 @@ def parse_event_to_AgendaItem(events):
     return ans
 
 def get_meetings(username):
-    ans1 = back.get_confirmed_meetings()
-    ans2 = back.get_confirmed_group_meetings()
+    ans1 = back.get_confirmed_meetings(username)
+    ans2 = back.get_confirmed_group_meetings(username)
     ans = ans1 + ans2
     ans.sort(key=lambda x: (x.date, x.start_time))
     return parse_event_to_AgendaItem(ans)
@@ -77,7 +77,12 @@ def create_meeting(name, description, time, endtime, date, participants, groups,
         print(e)
         return False
 
+def get_created_events(username):
+    ans = back.events_created()
+    return parse_event_to_AgendaItem(ans)
 
+def delete_event(username, id):
+    return back.remove_meeting(id)
 
 def accept_meeting(username, id):
     return back.accept_meeting(id)

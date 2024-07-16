@@ -23,6 +23,7 @@ class User:
         self.active = False  # Indica si el usuario está conectado
         self.confirmed_events = []  # Lista de IDs de eventos confirmados por el usuario
         self.pending_events = []  # Lista de IDs de eventos pendientes de confirmación por el usuario
+        self.created_events = []  # Lista de IDs de eventos creados por el usuario
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, User):
@@ -46,6 +47,7 @@ class User:
             Event: El evento creado.
         """
         self.confirmed_events.append(event.event_id)
+        self.created_events.append(event.event_id)
         print(f"Event {event.title} created and added to user {self.alias} confirmed events")
 
     def add_pending_event(self, event):
@@ -147,20 +149,23 @@ class User:
             self.groups.remove(group_id)
             
 
-    def remove_event(self, group: Group, event: Event):
+    def remove_event(self, event):
         """
-        Elimina un evento de un grupo.
-
-        Args:
-            group (Group): El grupo del que se va a eliminar el evento.
-            event (Event): El evento a eliminar.
-
-        Returns:
-            Event: El evento eliminado.
+        Elimina un evento.
         """
-        event = group.remove_event(self.alias, event)
+        if event.event_id in self.confirmed_events:
+            self.confirmed_events.remove(event.event_id)
+            print(f"Event {event.title} removed from user {self.alias} confirmed events")
 
-        return event
+        if event.event_id in self.pending_events:
+            self.pending_events.remove(event.event_id)
+            print(f"Event {event.title} removed from user {self.alias} pending events")
+
+        if event.event_id in self.created_events:
+            self.created_events.remove(event.event_id)
+            print(f"Event {event.title} removed from user {self.alias} created events")
+
+
 
         
     def set_event(self, event, group, **fields):
@@ -266,7 +271,8 @@ class User:
                 'logged':self.active, 
                 'groups':self.groups,
                 'confirmed_events':self.confirmed_events,
-                'pending_events':self.pending_events
+                'pending_events':self.pending_events,
+                'created_events':self.created_events
                 }
 
 

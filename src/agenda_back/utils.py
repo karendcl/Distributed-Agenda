@@ -69,6 +69,7 @@ class Back:
             user.groups = object['groups']
             user.confirmed_events = object['confirmed_events']
             user.pending_events = object['pending_events']
+            user.created_events = object['created_events']
         except Exception as e:
             print(e)
 
