@@ -290,20 +290,21 @@ class Agenda:
 
         else:
             for group_id in event.pending_confirmations_groups:
-                group = self.get(group_id)
-                if group.type == 'hierarchical' and user.alias in group.admins:
-                    confirmed = group.confirm_event(event.event_id, user.alias)
-                    if confirmed:
-                        event.group_confirm(group_id)
-                        self.set(event.event_id, event.dicc())
-                    self.set(group.group_id, group.dicc())
-                elif group.type == 'independent':
-                    confirmed = group.confirm_event(event.event_id, user.alias)
-                    if confirmed:
-                        event.group_confirm(group_id)
-                        self.set(event.event_id, event.dicc())
-                    self.set(group.group_id, group.dicc())
-                return True
+                if group_id in user.groups:
+                        group = self.get(group_id)
+                        if group.type == 'hierarchical' and user.alias in group.admins:
+                            confirmed = group.confirm_event(event.event_id, user.alias)
+                            if confirmed:
+                                event.group_confirm(group_id)
+                                self.set(event.event_id, event.dicc())
+                            self.set(group.group_id, group.dicc())
+                        elif group.type == 'independent':
+                            confirmed = group.confirm_event(event.event_id, user.alias)
+                            if confirmed:
+                                event.group_confirm(group_id)
+                                self.set(event.event_id, event.dicc())
+                            self.set(group.group_id, group.dicc())
+                        return True
 
         return False
 
