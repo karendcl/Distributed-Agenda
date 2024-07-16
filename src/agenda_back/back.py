@@ -63,17 +63,31 @@ class Agenda:
         return self.logged_user is not None
 
     def get(self, key):
+        print(f"Key: {key}")
         data = self.api.get_value(key)[1]
-        print(data)
+
+        if "kademlia.network" in data:
+            # Find the index of the opening square bracket '['
+            start_index = data.find("{") + 1
+            
+            # Find the index of the closing square bracket ']'
+            end_index = data.rfind("}") - 1
+            
+            data = data[start_index:end_index]
+            print("Clean")
+
+        print(f"Data: {data}")
         if data == None or data is None:
             return
 
         try:
+            print(f"In Try: {eval(data)}")
             data = eval(eval(data)[1])
         except Exception as e:
             print(f"Error in Eval: {e}")
             data = eval(data)
 
+        print(f"Struct data: {data}")
         return self.back.create(data)
 
     def set(self, key, value):

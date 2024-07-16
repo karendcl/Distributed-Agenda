@@ -169,7 +169,7 @@ class Server:
                                   self.ksize, self.alpha)
         result = await spider.find()
 
-        log.debug("RESULT GET: %s", result)
+        # log.debug("RESULT GET: %s", result)
 
         if res_self is not None and result is not None:
             if res_self[0] > result[0]:
