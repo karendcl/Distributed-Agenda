@@ -429,7 +429,7 @@ class IndependentGroup(Group):
         """
         Agrega un usuario al grupo.
         """
-        self.users.append(user_to_add.alias)
+        self.users.append(user_to_add)
         
     
     def remove_user(self, from_user, user_to_remove):
@@ -666,24 +666,8 @@ class HierarchicalGroup(Group):
         """
         Agrega un usuario al grupo.
         """
-        if user_to_add.alias in self.users:
-            print(f"El usuario {user_to_add.alias} ya pertenece al grupo {self.group_id}")
-            return None
-        
-        if from_user_alias in self.admins:
-            request = JoinRequest(self.group_id, from_user_alias,1,user_to_add.alias)
-            user_to_add.set_request(request.request_id)
-
-            self.requests.append(request.request_id)
-            self.waiting_users.append(user_to_add.alias)
-
-            print(f"Invitación a unirse enviada al usuario {user_to_add.alias}")
-
-            return request
-        
-        print(f"El usuario {from_user_alias} no puede agregar usuarios porque no es administrador del grupo.") 
-        
-        return None
+        self.users.append(user_to_add)
+        print(f"Usuario {user_to_add} agregado correctamente al grupo {self.group_id}")
     
 
     def remove_user(self, from_user_alias, user_to_remove):

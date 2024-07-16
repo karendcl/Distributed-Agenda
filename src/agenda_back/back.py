@@ -173,15 +173,16 @@ class Agenda:
         self.set(user.alias, user.dicc())
         self.set(new_group.group_id, new_group.dicc())
 
-        if users:
+        if users != []:
             for us in users:
                 user_ = self.get(us)
                 user_.add_to_group(name)
-                print(f"Set: {user_.dicc()}")
+                print(f"User added to group: {user_.dicc()}")
                 self.set(user_.alias, user_.dicc())
 
                 new_group = self.get(name)
-                new_group.add_user(user.alias, user_)
+                new_group.add_user(user.alias, us)
+                print(f"Group added user: {new_group.dicc()}")
                 self.set(new_group.group_id, new_group.dicc())
 
 
