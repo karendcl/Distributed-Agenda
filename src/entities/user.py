@@ -58,6 +58,33 @@ class User:
         self.pending_events.append(event.event_id)
         print(f"Event {event.title} added to user {self.alias} pending events")
 
+    def confirm_event(self, event):
+        """
+        Confirma un evento pendiente.
+
+        Args:
+            event (Event): El evento a confirmar.
+        """
+        if event.event_id in self.pending_events:
+            self.pending_events.remove(event.event_id)
+            self.confirmed_events.append(event.event_id)
+            print(f"Event {event.title} confirmed by user {self.alias}")
+        else:
+            print(f"Event {event.title} is not pending for user {self.alias}")
+
+    def reject_event(self, event):
+        """
+        Rechaza un evento pendiente.
+
+        Args:
+            event (Event): El evento a rechazar.
+        """
+        if event.event_id in self.pending_events:
+            self.pending_events.remove(event.event_id)
+            print(f"Event {event.title} rejected by user {self.alias}")
+        else:
+            print(f"Event {event.title} is not pending for user {self.alias}")
+
     def create_group(self, group_name, group_type,id=None):
         """
         Crea un nuevo grupo.

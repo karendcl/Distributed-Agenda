@@ -199,11 +199,12 @@ class Agenda:
             'date': date,
             'start_time': start_time,
             'end_time': end_time,
-            'participants': participants,
+            'participants': participants + [self.logged_user],
             'groups': groups
         })
 
         self.set(event.event_id, event.dicc())
+        event = self.get(event.event_id)
 
         user = self.get(self.logged_user)
         user.create_event(event)
@@ -280,6 +281,7 @@ class Agenda:
 
         if user.alias in event.pending_confirmations_people:
             event.user_confirm(user.alias)
+            user.confirm_event(event.event_id)
             self.set(event.event_id, event.dicc())
             self.set(user.alias, user.dicc())
             return True
@@ -309,6 +311,7 @@ class Agenda:
 
         if user.alias in event.pending_confirmations_people:
             event.user_reject(user.alias)
+            user.reject_event(event.event_id)
             self.set(event.event_id, event.dicc())
             self.set(user.alias, user.dicc())
             return True
