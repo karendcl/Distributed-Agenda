@@ -232,9 +232,12 @@ class Agenda:
 
         for g in groups:
             group = self.get(g)
-            group.add_event(event, self.logged_user)
+            confirmed = group.add_event(event, self.logged_user)
             self.set(group.group_id, group.dicc())
 
+            if confirmed:
+                event.group_confirm(g)
+                self.set(event.event_id, event.dicc())
 
     def get_pending_meetings(self):
         user = self.get(self.logged_user)
