@@ -200,7 +200,7 @@ class Agenda:
             'date': date,
             'start_time': start_time,
             'end_time': end_time,
-            'participants': [self.logged_user] + participants ,
+            'participants': [self.logged_user] + participants,
             'groups': groups
         })
 
@@ -218,7 +218,7 @@ class Agenda:
 
         for g in groups:
             group = self.get(g)
-            group.add_event(event)
+            group.add_event(event, self.logged_user)
             self.set(group.group_id, group.dicc())
 
 
@@ -252,15 +252,20 @@ class Agenda:
                 for e in group.waiting_events:
                     event = self.get(e)
                     print(f"Group Event: {event}")
-                    if not event.confirmed and not event.rejected:
+                    if group.user_needs_to_confirm_event(event.event_id, user.alias):
                         ans.append(event)
+                    # if not event.confirmed and not event.rejected:
+                    #     ans.append(event)
 
             elif group.get_type() == 'hierarchical':
                 if user.alias in group.admins:
                     for e in group.waiting_events:
                         event = self.get(e)
-                        if not event.confirmed and not event.rejected:
+                        print(f"Group Event: {event}")
+                        if group.user_needs_to_confirm_event(event.event_id, user.alias):
                             ans.append(event)
+                        # if not event.confirmed and not event.rejected:
+                        #     ans.append(event)
 
         print(f'Pending group meetings: {ans}')
         return ans
@@ -358,7 +363,6 @@ class Agenda:
 
     def remove_meeting(self, event_id):
         try:
-
             event = self.get(event_id)
 
             for p in event.participants:

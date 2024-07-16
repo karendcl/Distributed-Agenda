@@ -434,7 +434,7 @@ class MainWindow(QMainWindow):
 
         accepted = get_meetings(username)
         tabulate = get_pending_meetings(username)
-        table = self.createTable(tabulate, username, True, accepted)
+        table = self.createTable(tabulate, username, need_to_accept=True, pending=accepted)
         layout.addWidget(table)
 
         back_btn = QPushButton("Back")

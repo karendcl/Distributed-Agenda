@@ -341,12 +341,17 @@ class IndependentGroup(Group):
         return 'independent'
 
 
-    def add_event(self, event: Event):
+    def user_needs_to_confirm_event(self, event, user):
+        """
+        Verifica si un usuario necesita confirmar un evento.
+        """
+        return event in self.waiting_events and user in self.waiting_users[self.waiting_events.index(event)]
+    def add_event(self, event: Event, user):
         """
         Agrega un evento al grupo.
         """
         self.waiting_events.append(event.event_id)
-        self.waiting_users.append(self.users)
+        self.waiting_users.append([x for x in self.users if x != user.alias])
         print(f"Evento {event.event_id} agregado correctamente al grupo {self.group_id}")
 
     def confirm_event(self, event, user):
@@ -569,6 +574,11 @@ class HierarchicalGroup(Group):
         return f"""{self.group_name}:\n ID: {self.group_id}\n Users: {self.users}\n Events:{self.events}\n Admins: {self.admins}"""
 
 
+    def user_needs_to_confirm_event(self, event, user):
+        """
+        Verifica si un usuario necesita confirmar un evento.
+        """
+        return event in self.waiting_events and user in self.admins
     def get_type(self):
         """
         Devuelve el tipo de grupo.
@@ -595,7 +605,7 @@ class HierarchicalGroup(Group):
         print(f"El usuario {user_to_change} no está en el grupo {self.group_id}")
         
 
-    def add_event(self, event):
+    def add_event(self, event, user):
         """
         Agrega un evento al grupo.
         """
