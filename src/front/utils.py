@@ -99,6 +99,14 @@ def get_all_users(username):
 def get_all_groups():
     return back.groups_of_user()
 
+def create_cont(num):
+    try:
+        back.sudo('create', num)
+        return True
+    except Exception as e:
+        print(e)
+        return False
+
 # todo once a leader accepts it, all group participants get it
 
 
