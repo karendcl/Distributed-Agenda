@@ -56,12 +56,16 @@ def parse_event_to_AgendaItem(events):
     return ans
 
 def get_meetings(username):
-    ans = back.get_confirmed_meetings()
+    ans1 = back.get_confirmed_meetings()
+    ans2 = back.get_confirmed_group_meetings()
+    ans = ans1 + ans2
     ans.sort(key=lambda x: (x.date, x.start_time))
     return parse_event_to_AgendaItem(ans)
 
 def get_pending_meetings(username):
-    ans = back.get_pending_meetings()
+    ans1 = back.get_pending_meetings()
+    ans2 = back.get_pending_group_meetings()
+    ans = ans1 + ans2
     ans.sort(key=lambda x: (x.date, x.start_time))
     return parse_event_to_AgendaItem(ans)
 
