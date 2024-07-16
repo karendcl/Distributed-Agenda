@@ -324,6 +324,10 @@ class MainWindow(QMainWindow):
         view_others_agenda_btn.clicked.connect(lambda: self.view_others_agenda(username))
         layout.addWidget(view_others_agenda_btn, alignment=Qt.AlignCenter)
 
+        delete_events_btn = QPushButton("Delete Events")
+        delete_events_btn.clicked.connect(lambda: self.delete_events(username))
+        layout.addWidget(delete_events_btn, alignment=Qt.AlignCenter)
+
         log_out_btn = QPushButton("Log Out")
         log_out_btn.clicked.connect(lambda: self.logout(username))
         layout.addWidget(log_out_btn, alignment=Qt.AlignCenter)
@@ -332,6 +336,32 @@ class MainWindow(QMainWindow):
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
+
+    def delete_events(self, username):
+        self.setMaximumSize(800, 600)
+        self.setGeometry(100, 100, 800, 600)
+
+        layout = QVBoxLayout()
+
+        label = QTitleLabel("Delete Events")
+        layout.addWidget(label)
+
+        events = get_created_events(username)
+        table = self.createTable(events, username, to_remove=True)
+        layout.addWidget(table)
+
+        back_btn = QPushButton("Back")
+        back_btn.clicked.connect(lambda: self.my_account(username))
+        layout.addWidget(back_btn, alignment = Qt.AlignCenter)
+
+        widget = QWidget()
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
+
+    def remove_event(self, username, id):
+        delete_event(username, id)
+        self.delete_events(username)
+
 
     def logout(self, username):
         logout_(username)
@@ -517,7 +547,7 @@ class MainWindow(QMainWindow):
         self.view_pending_meetings(username)
 
 
-    def createTable(self, agenda : List[AgendaItem], username, need_to_accept = False, pending = None):
+    def createTable(self, agenda : List[AgendaItem], username, need_to_accept = False, pending = None, to_remove=False):
         conflicts = identify_conflicts(agenda, pending)
         table = QTableWidget()
         table.setRowCount(len(agenda))
@@ -534,6 +564,10 @@ class MainWindow(QMainWindow):
             if need_to_accept:
                 button = QPushButton("Accept")
                 button.clicked.connect(lambda: self.accept_decline(username, item.id))
+                table.setCellWidget(i, 5, button)
+            if to_remove:
+                button = QPushButton("Remove")
+                button.clicked.connect(lambda: self.remove_event(username, item.id))
                 table.setCellWidget(i, 5, button)
 
             if item.id in conflicts:

@@ -408,22 +408,22 @@ class IndependentGroup(Group):
         )
 
 
-    def remove_event(self, user, event):
+    def remove_event(self, event):
         """
         Elimina un evento del grupo.
         """
-        if event.from_user == user:
-            if event.event_id in self.events:
-                if user in self.users:
-                    self.events.remove(event.event_id)
-                    print(f"Evento {event.event_id} eliminado correctamente del grupo {self.group_id}")            
-                    return True
-                else:
-                    print(f"El usuario {user} no puede eliminar un evento del grupo {self.group_id} porque no está en el grupo.")
-    
-        else:
-            print(f"El usuario {user} no puede eliminar un evento del grupo {self.group_id} porque no fue quien lo creó.")
-        return False
+        if event.event_id in self.events:
+            self.events.remove(event.event_id)
+            print(f"Evento {event.event_id} eliminado correctamente del grupo {self.group_id}")
+
+        if event.event_id in self.waiting_events:
+            index = self.waiting_events.index(event.event_id)
+            self.waiting_events.remove(event.event_id)
+            self.waiting_users.remove(self.waiting_users[index])
+            print(f"Evento {event.event_id} eliminado correctamente del grupo {self.group_id}")
+
+
+
     
     def add_user(self, from_user_alias, user_to_add):
         """
@@ -649,18 +649,17 @@ class HierarchicalGroup(Group):
         )
 
 
-    def remove_event(self, user, event: Event):
+    def remove_event(self, event):
         """
         Elimina un evento del grupo.
         """
-        if user in self.admins and event.event_id in self.events:
+        if event.event_id in self.events:
             self.events.remove(event.event_id)
-            print(f"Evento {event.event_id} eliminado correctamente del grupo {self.group_id}") 
-            return True
-        
-        print(f"El usuario {user} no puede eliminar el evento porque no es administrador del grupo {self.group_id}")
+            print(f"Evento {event.event_id} eliminado correctamente del grupo {self.group_id}")
 
-        return False
+        if event.event_id in self.waiting_events:
+            self.waiting_events.remove(event.event_id)
+            print(f"Evento {event.event_id} eliminado correctamente del grupo {self.group_id}")
     
     def add_user(self, from_user_alias, user_to_add):
         """
