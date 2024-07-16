@@ -649,18 +649,17 @@ class HierarchicalGroup(Group):
         )
 
 
-    def remove_event(self, user, event: Event):
+    def remove_event(self, event):
         """
         Elimina un evento del grupo.
         """
-        if user in self.admins and event.event_id in self.events:
+        if event.event_id in self.events:
             self.events.remove(event.event_id)
-            print(f"Evento {event.event_id} eliminado correctamente del grupo {self.group_id}") 
-            return True
-        
-        print(f"El usuario {user} no puede eliminar el evento porque no es administrador del grupo {self.group_id}")
+            print(f"Evento {event.event_id} eliminado correctamente del grupo {self.group_id}")
 
-        return False
+        if event.event_id in self.waiting_events:
+            self.waiting_events.remove(event.event_id)
+            print(f"Evento {event.event_id} eliminado correctamente del grupo {self.group_id}")
     
     def add_user(self, from_user_alias, user_to_add):
         """
