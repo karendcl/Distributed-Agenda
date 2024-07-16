@@ -73,7 +73,7 @@ class Server:
         """
         loop = asyncio.get_event_loop()
         listen = loop.create_datagram_endpoint(self._create_protocol,
-                                               local_addr=(interface, port))
+                                            local_addr=(interface, port))
         log.info("Node %i listening on %s:%i",
                  self.node.long_id, interface, port)
         self.node.ip = interface
