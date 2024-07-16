@@ -246,13 +246,13 @@ class Agenda:
         for group_id in user.groups:
             group = self.get(group_id)
 
-            if group.type == 'independent':
+            if group.get_type() == 'independent':
                 for e in group.events:
                     event = self.get(e)
                     if not event.confirmed and not event.rejected:
                         ans.append(event)
 
-            elif group.type == 'hierarchical':
+            elif group.get_type() == 'hierarchical':
                 if user.alias in group.admins:
                     for e in group.events:
                         event = self.get(e)
