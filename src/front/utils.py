@@ -56,7 +56,6 @@ def parse_event_to_AgendaItem(events):
         if event.event_id not in ids:
             ids.append(event.event_id)
             ans.append(AgendaItem(event.title, event.description, event.start_time, event.end_time, event.date, event.event_id))
-
     return ans
 
 def get_meetings(username):
