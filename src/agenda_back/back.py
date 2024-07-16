@@ -232,10 +232,13 @@ class Agenda:
 
     def get_confirmed_meetings(self):
         user = self.get(self.logged_user)
+        print(f"User: {user}")
         ans = []
         for e in user.confirmed_events:
             event = self.get(e)
+            print(f"Event: {event}")
             if event.confirmed:
+                print("Event is confirmed")
                 ans.append(event)
         return ans
 

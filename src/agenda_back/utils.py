@@ -38,6 +38,7 @@ class Back:
 
     def _create_event(self, object):
 
+        print("Re-Creating Event")
         title = object['title']
         description = object['description']
         date = object['date']
@@ -55,6 +56,7 @@ class Back:
             event.pending_confirmations_people = object['pending_confirmations_people']
             event.pending_confirmations_groups = object['pending_confirmations_groups']
         except Exception as e:
+            print("Exception in ReCreating Event")
             print(e)
 
         return event
