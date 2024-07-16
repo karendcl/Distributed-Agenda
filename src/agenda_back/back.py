@@ -71,7 +71,7 @@ class Agenda:
         try:
             data = eval(eval(data)[1])
         except Exception as e:
-            print(e)
+            print(f"Error in Eval: {e}")
             data = eval(data)
 
         return self.back.create(data)
@@ -243,20 +243,21 @@ class Agenda:
 
     def get_pending_group_meetings(self):
         user = self.get(self.logged_user)
-
+        print(f"G User: {user}")
         ans = []
         for group_id in user.groups:
             group = self.get(group_id)
 
             if group.get_type() == 'independent':
-                for e in group.events:
+                for e in group.waiting_events:
                     event = self.get(e)
+                    print(f"Group Event: {event}")
                     if not event.confirmed and not event.rejected:
                         ans.append(event)
 
             elif group.get_type() == 'hierarchical':
                 if user.alias in group.admins:
-                    for e in group.events:
+                    for e in group.waiting_events:
                         event = self.get(e)
                         if not event.confirmed and not event.rejected:
                             ans.append(event)
@@ -296,13 +297,13 @@ class Agenda:
                 if group_id in user.groups:
                         was_in_group = True
                         group = self.get(group_id)
-                        if group.type == 'hierarchical' and user.alias in group.admins:
+                        if group.get_type() == 'hierarchical' and user.alias in group.admins:
                             confirmed = group.confirm_event(event.event_id, user.alias)
                             if confirmed:
                                 event.group_confirm(group_id)
                                 self.set(event.event_id, event.dicc())
                             self.set(group.group_id, group.dicc())
-                        elif group.type == 'independent':
+                        elif group.get_type() == 'independent':
                             confirmed = group.confirm_event(event.event_id, user.alias)
                             if confirmed:
                                 event.group_confirm(group_id)
@@ -327,13 +328,13 @@ class Agenda:
             for group_id in event.pending_confirmations_groups:
                 if group_id in user.groups:
                     group = self.get(group_id)
-                    if group.type == 'hierarchical' and user.alias in group.admins:
+                    if group.get_type() == 'hierarchical' and user.alias in group.admins:
                         rejected = group.reject_event(event.event_id, user.alias)
                         if rejected:
                             event.group_reject(group_id)
                             self.set(event.event_id, event.dicc())
                         self.set(group.group_id, group.dicc())
-                    elif group.type == 'independent':
+                    elif group.get_type() == 'independent':
                         rejected = group.reject_event(event.event_id, user.alias)
                         if rejected:
                             event.group_reject(group_id)

@@ -326,7 +326,7 @@ class IndependentGroup(Group):
         super().__init__(name,id)  
         self.requests = []      
         self.waiting_events = []
-        self.waiting_users = [[]]
+        self.waiting_users = []
 
     def __str__(self) -> str:
         """
@@ -358,6 +358,7 @@ class IndependentGroup(Group):
         :param user:
         :return:
         """
+
         index = self.waiting_events.index(event)
         if user in self.waiting_users[index]:
             self.waiting_users[index].remove(user)
