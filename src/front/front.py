@@ -328,6 +328,10 @@ class MainWindow(QMainWindow):
         delete_events_btn.clicked.connect(lambda: self.delete_events(username))
         layout.addWidget(delete_events_btn, alignment=Qt.AlignCenter)
 
+        create_containers_btn = QPushButton("Create Containers")
+        create_containers_btn.clicked.connect(lambda: self.create_containers(username))
+        layout.addWidget(create_containers_btn, alignment=Qt.AlignCenter)
+
         log_out_btn = QPushButton("Log Out")
         log_out_btn.clicked.connect(lambda: self.logout(username))
         layout.addWidget(log_out_btn, alignment=Qt.AlignCenter)
@@ -357,6 +361,42 @@ class MainWindow(QMainWindow):
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
+
+    def create_containers(self, username):
+        layout = QVBoxLayout()
+        name = QTitleLabel("Create Containers")
+
+        label = QLabel("Number of Containers")
+        num = QLineEdit()
+        layout.addWidget(name)
+        layout.addWidget(label)
+        layout.addWidget(num)
+
+        button_submit = QPushButton("Submit")
+        button_submit.clicked.connect(lambda: self._create_containers(num.text(), username))
+        layout.addWidget(button_submit, alignment = Qt.AlignCenter)
+
+        widget = QWidget()
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
+
+
+    def _create_containers(self, num, username):
+        num = int(num)
+        success = create_cont(num)
+
+        if success:
+            msg = QMessageBox()
+            msg.setWindowTitle("Success")
+            msg.setText("Containers created")
+            msg.exec_()
+        else:
+            msg = QMessageBox()
+            msg.setWindowTitle("Error")
+            msg.setText("Container creation failed")
+            msg.exec_()
+
+        self.my_account(username)
 
     def remove_event(self, username, id):
         delete_event(username, id)

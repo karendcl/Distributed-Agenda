@@ -351,7 +351,7 @@ class IndependentGroup(Group):
         Agrega un evento al grupo.
         """
         self.waiting_events.append(event.event_id)
-        self.waiting_users.append([x for x in self.users if x != user.alias])
+        self.waiting_users.append([x for x in self.users if x != user])
         print(f"Evento {event.event_id} agregado correctamente al grupo {self.group_id}")
 
     def confirm_event(self, event, user):
