@@ -277,6 +277,7 @@ class Agenda:
 
     def accept_meeting(self, event_id):
         user = self.get(self.logged_user)
+        print(f'Event_id: {event_id}')
         event = self.get(event_id)
 
         if user.alias in event.pending_confirmations_people:

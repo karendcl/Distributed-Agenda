@@ -533,7 +533,7 @@ class MainWindow(QMainWindow):
             table.setItem(i, 4, QTableWidgetItem(str(item.date)))
             if need_to_accept:
                 button = QPushButton("Accept")
-                button.clicked.connect(lambda: self.accept_decline(username, i))
+                button.clicked.connect(lambda: self.accept_decline(username, item.id))
                 table.setCellWidget(i, 5, button)
 
             if item.id in conflicts:
