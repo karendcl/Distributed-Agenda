@@ -48,6 +48,15 @@ class Back:
 
         event = Event(title, description, date, start_time, end_time, participants, groups)
 
+        try:
+            event.event_id = object['event_id']
+            event.confirmed = object['confirmed']
+            event.rejected = object['rejected']
+            event.pending_confirmations_people = object['pending_confirmations_people']
+            event.pending_confirmations_groups = object['pending_confirmations_groups']
+        except Exception as e:
+            print(e)
+
         return event
 
 

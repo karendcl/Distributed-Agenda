@@ -57,7 +57,6 @@ class CalendarEvent(ABC):
         pass
 
 class Event(CalendarEvent):
-
     def __init__(self, title, description, date, start_time, end_time, participants, groups):
         """
         Inicializa un nuevo evento.
