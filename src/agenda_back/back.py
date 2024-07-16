@@ -284,7 +284,7 @@ class Agenda:
 
         if user.alias in event.pending_confirmations_people:
             event.user_confirm(user.alias)
-            user.confirm_event(event.event_id)
+            user.confirm_event(event)
             self.set(event.event_id, event.dicc())
             self.set(user.alias, user.dicc())
             return True
