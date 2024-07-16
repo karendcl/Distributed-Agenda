@@ -8,6 +8,7 @@ import subprocess
 # Inside script1.py
 import sys
 import os
+import random
 
 # Add the parent directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -28,6 +29,40 @@ container_ip = subprocess.check_output(
     "hostname -i", shell=True).decode("utf-8").strip()
 print(container_ip)
 stop_thread = False
+
+def get_cached_ips():
+    ips = []
+    try:
+        with open('ips.txt', 'r') as f:
+            for line in f:
+                ips.append(line.strip())
+        return ips
+    except:
+        return ips
+
+def save_ip(ip):
+    with open('ips.txt', 'a') as f:
+        f.write(ip + '\n')
+
+def discover_nodes(cached_ips, loop):
+    discovered_ips = []
+
+    if cached_ips:
+        for ip in cached_ips:
+#             try to connect to the ip
+            try:
+                asyncio.run_coroutine_threadsafe(connect_node(Server(), ip, 8468, loop), loop)
+                discovered_ips.append(ip)
+            except Exception as e:
+                print(e)
+
+    if discovered_ips ==[]:
+        discovered_ips += [bc_client()]
+
+    return discovered_ips
+
+
+
 
 
 def bc_server():
@@ -87,26 +122,33 @@ def main(loop):
     global stop_thread
     args = parse_arguments()
 
-    ip = bc_client()
-    port = 8468
+    cached_ips = get_cached_ips()
+    ips = discover_nodes(cached_ips, loop)
 
-    server = Server(ip)
+    if ips:
+        ip = ips[0]
+        port = 8468
 
-    if ip == None:
-        start_network(server, loop)
-    elif args.operation == 'set':
-        if args.key and args.value:
-            asyncio.run(set(server, ip, port, args))
-            stop_thread = True
-            return
-    elif args.operation == 'get':
-        if args.key:
-            result = asyncio.run(get(server, ip, port, args))
-            stop_thread = True
-            print(result)
-            return result
+        server = Server(ip)
+
+        if ip == None:
+            start_network(server, loop)
+        elif args.operation == 'set':
+            if args.key and args.value:
+                asyncio.run(set(server, ip, port, args))
+                stop_thread = True
+                return
+        elif args.operation == 'get':
+            if args.key:
+                result = asyncio.run(get(server, ip, port, args))
+                stop_thread = True
+                print(result)
+                return result
+        else:
+            connect_node(server, ip, port, loop)
     else:
-        connect_node(server, ip, port, loop)
+        print("No nodes found")
+        start_network(Server(), loop)
 
 
 if __name__ == "__main__":
